@@ -1,0 +1,103 @@
+/* Tailwind CSS Directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Styles */
+body, h1, h2, h3, h4, h5, h6, p, div {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif !important;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Add spacing between components */
+}
+
+.bg-background-image {
+  background-image: url('/public/images/student.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 100%; /* Ensure it spans the full width */
+  min-height: 100vh; /* Ensure it spans the full height */
+}
+
+.hover-effect:hover {
+  transform: translateY(-5px);
+}
+
+header {
+  background-color: #ffffff;
+  color: #000000;
+  padding: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-family: 'Poppins', sans-serif !important;
+}
+
+header nav ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 16px;
+  font-family: 'Poppins', sans-serif !important;
+}
+
+header nav ul li a {
+  color: #000000;
+  text-decoration: none;
+}
+
+header nav ul li a:hover {
+  text-decoration: underline;
+}
+
+/* Define common styles for both buttons */
+.sign-up-button, .sign-in-button {
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+/* Specific styles for each button */
+.sign-up-button {
+  background-color: #ffffff;
+  color: #0070f3;
+  border: 2px solid #0070f3;
+}
+
+.sign-up-button:hover {
+  background-color: #0070f3;
+  color: #ffffff;
+}
+
+.sign-in-button {
+  background-color: #0070f3;
+  color: #ffffff;
+  border: 2px solid #0070f3;
+}
+
+.sign-in-button:hover {
+  background-color: #ffffff;
+  color: #0070f3;
+}/* Add this CSS to your global styles */
+@media (max-width: 2500px) {
+  .hide-text span {
+    display: none;
+  }
+}
+
+.hide-text svg {
+  display: inline-block;
+}
