@@ -4,7 +4,7 @@ import { Box, Button } from '@mantine/core';
 import { useMediaQuery } from 'react-responsive';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 import HomeIcon from '@mui/icons-material/Home';
-import DescriptionIcon from '@mui/icons-material/Description';
+import DashboardIcon from '@mui/icons-material/Dashboard';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import SimpleWhiteHeader from './SimpleWhiteHeader';
@@ -47,13 +47,13 @@ const StudentPick: React.FC = () => {
               {isSidebarOpen && <span>Home</span>}
             </NavLink>
             <NavLink
-              to="/documents"
+              to="/price-comparison"
               className={({ isActive }) =>
                 isActive ? 'flex items-center space-x-2 bg-gray-200 p-2 w-full' : 'flex items-center space-x-2 p-2 w-full'
               }
             >
-              <DescriptionIcon />
-              {isSidebarOpen && <span>Documents</span>}
+              <DashboardIcon />
+              {isSidebarOpen && <span>Dashboard</span>}
             </NavLink>
             <NavLink
               to="/account"

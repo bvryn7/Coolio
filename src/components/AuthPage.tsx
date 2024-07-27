@@ -1,5 +1,5 @@
-import React, { useState, CSSProperties } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect, CSSProperties } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface AuthPageProps {
   onAuthChange: (isAuthenticated: boolean) => void;
@@ -13,24 +13,35 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuthChange }) => {
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const savedContact = localStorage.getItem('savedContact');
+    const savedPassword = localStorage.getItem('savedPassword');
+    const savedRememberMe = localStorage.getItem('savedRememberMe') === 'true';
+
+    if (savedContact && savedPassword && savedRememberMe) {
+      setContact(savedContact);
+      setPassword(savedPassword);
+      setRememberMe(savedRememberMe);
+    }
+  }, []);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (isSignUp) {
-      if (validateEmail(contact) || validatePhone(contact)) {
-        console.log('Name:', name);
-        console.log('Contact:', contact);
-        console.log('Password:', password);
-        onAuthChange(true);
-        navigate('/home');
-      } else {
-        console.error('Invalid contact information');
-      }
+    const token = "sampleToken"; // Replace with actual token from server
+
+    if (rememberMe) {
+      localStorage.setItem('savedContact', contact);
+      localStorage.setItem('savedPassword', password);
+      localStorage.setItem('savedRememberMe', 'true');
     } else {
-      console.log('Email/Phone:', contact);
-      console.log('Password:', password);
-      onAuthChange(true);
-      navigate('/home');
+      localStorage.removeItem('savedContact');
+      localStorage.removeItem('savedPassword');
+      localStorage.removeItem('savedRememberMe');
     }
+
+    localStorage.setItem('authToken', token); // Save token
+    onAuthChange(true);
+    navigate('/home');
   };
 
   const validateEmail = (email: string) => {

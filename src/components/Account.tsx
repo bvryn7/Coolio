@@ -1,16 +1,13 @@
-// HomePage.tsx
 import React, { useState, useEffect } from 'react';
 import { Box } from '@mantine/core';
 import { useMediaQuery } from 'react-responsive';
 import SimpleWhiteHeader from './SimpleWhiteHeader';
-import HomeMainContent from './HomeMainContent';
-import HomeGetStartedCard from './HomeGetStartedCard';
-import Sidebar from './SideBar'; // Import the new Sidebar component
+import Sidebar from './SideBar'; // Ensure correct path
+import AccountMainContent from './AccountMainContent'; // Import Account main content
 
-const HomePage: React.FC = () => {
+const Account: React.FC = () => {
   const isMediumScreen = useMediaQuery({ query: '(min-width: 768px)' });
   const [isSidebarOpen, setIsSidebarOpen] = useState(isMediumScreen);
-  const userName = "Benjamin"; // Replace with dynamic user name as needed
 
   useEffect(() => {
     setIsSidebarOpen(isMediumScreen);
@@ -25,11 +22,10 @@ const HomePage: React.FC = () => {
       <Sidebar isSidebarOpen={isSidebarOpen} handleSidebarToggle={handleSidebarToggle} />
       <Box className="flex-1 flex flex-col bg-white">
         <SimpleWhiteHeader />
-        <HomeMainContent userName={userName} />
-        <HomeGetStartedCard />
+        <AccountMainContent />
       </Box>
     </Box>
   );
 };
 
-export default HomePage;
+export default Account;

@@ -4,7 +4,7 @@ import { Box, Button } from '@mantine/core';
 import { useMediaQuery } from 'react-responsive';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 import HomeIcon from '@mui/icons-material/Home';
-import DescriptionIcon from '@mui/icons-material/Description';
+import DescriptionIcon from '@mui/icons-material/Dashboard';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import SimpleWhiteHeader from './SimpleWhiteHeader'; // Correct path to the SimpleWhiteHeader component
@@ -47,13 +47,13 @@ const StudentOverview: React.FC = () => {
               {isSidebarOpen && <span>Home</span>}
             </NavLink>
             <NavLink
-              to="/documents"
+              to="/price-comparison"
               className={({ isActive }) =>
                 isActive ? 'flex items-center space-x-2 bg-gray-200 p-2 w-full' : 'flex items-center space-x-2 p-2 w-full'
               }
             >
               <DescriptionIcon />
-              {isSidebarOpen && <span>Documents</span>}
+              {isSidebarOpen && <span>Dashboard</span>}
             </NavLink>
             <NavLink
               to="/account"
@@ -68,7 +68,8 @@ const StudentOverview: React.FC = () => {
         </div>
         <div className="mt-auto">
           <NavLink
-            to="/signin"
+            to="/auth"
+            onClick={() => localStorage.removeItem('authToken')}
             className={({ isActive }) =>
               isActive ? 'flex items-center space-x-2 bg-gray-200 p-2 w-full' : 'flex items-center space-x-2 p-2 w-full'
             }

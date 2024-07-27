@@ -3,25 +3,19 @@ import { NavLink } from 'react-router-dom';
 import { Box } from '@mantine/core';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'; // Import the arrow icon
 
-interface NextPrevProps {
-  nextLink: string;
+interface BackButtonProps {
   prevLink: string;
 }
 
-const NextPrev: React.FC<NextPrevProps> = ({ nextLink, prevLink }) => {
+const BackButton: React.FC<BackButtonProps> = ({ prevLink }) => {
   return (
-    <Box className="px-24 mt-12">
-      <hr className="border-t border-gray-300 mb-8" />
-      <Box className="flex justify-between">
+    <Box className="px-24 mt-4 mb-8">
+      <hr className="border-t border-gray-300 mb-4" />
+      <Box className="flex justify-start">
         <NavLink to={prevLink}>
           <button className="flex items-center text-[#003478] rounded px-8 py-4 text-xl bg-transparent border-transparent hover:bg-blue-50 transition">
             <ArrowBackIcon className="mr-2" />
             Back
-          </button>
-        </NavLink>
-        <NavLink to={nextLink}>
-          <button className="flex items-center text-white bg-[#003478] rounded px-8 py-4 text-xl hover:bg-blue-700 transition">
-            Continue
           </button>
         </NavLink>
       </Box>
@@ -29,4 +23,4 @@ const NextPrev: React.FC<NextPrevProps> = ({ nextLink, prevLink }) => {
   );
 };
 
-export default NextPrev;
+export default BackButton;

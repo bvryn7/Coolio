@@ -91,7 +91,8 @@ header nav ul li a:hover {
 .sign-in-button:hover {
   background-color: #ffffff;
   color: #0070f3;
-}/* Add this CSS to your global styles */
+}
+
 @media (max-width: 2500px) {
   .hide-text span {
     display: none;
@@ -100,4 +101,14 @@ header nav ul li a:hover {
 
 .hide-text svg {
   display: inline-block;
+}
+
+.confetti-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  pointer-events: none;
 }

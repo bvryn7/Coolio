@@ -4,12 +4,13 @@ import { Box, Button } from '@mantine/core';
 import { useMediaQuery } from 'react-responsive';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 import HomeIcon from '@mui/icons-material/Home';
-import DescriptionIcon from '@mui/icons-material/Description';
+import DashboardIcon from '@mui/icons-material/Dashboard';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import SimpleWhiteHeader from './SimpleWhiteHeader';
 import ProgressBar from './ProgressBar';
 import NextPrev from './NextPrev';
+import StudentProfileMyinfoMainContent from './StudentProfileMyinfoMainContent'; // Import the main content component
 
 const StudentProfileMyinfo: React.FC = () => {
   const isMediumScreen = useMediaQuery({ query: '(min-width: 768px)' });
@@ -47,13 +48,13 @@ const StudentProfileMyinfo: React.FC = () => {
               {isSidebarOpen && <span>Home</span>}
             </NavLink>
             <NavLink
-              to="/documents"
+              to="/price-comparison"
               className={({ isActive }) =>
                 isActive ? 'flex items-center space-x-2 bg-gray-200 p-2 w-full' : 'flex items-center space-x-2 p-2 w-full'
               }
             >
-              <DescriptionIcon />
-              {isSidebarOpen && <span>Documents</span>}
+              <DashboardIcon />
+              {isSidebarOpen && <span>Dashboard</span>}
             </NavLink>
             <NavLink
               to="/account"
@@ -85,7 +86,7 @@ const StudentProfileMyinfo: React.FC = () => {
         <ProgressBar />
         <Box className="flex-grow p-8">
           <h1 className="text-3xl font-bold mb-4">Student Profile</h1>
-          <p>Welcome to the Student Profile page!</p>
+          <StudentProfileMyinfoMainContent /> {/* Use the main content component */}
           <NextPrev nextLink="/student-overview" prevLink="/home" /> {/* Update the prevLink */}
         </Box>
       </Box>

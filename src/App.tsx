@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from 'react-router-dom';
+import { UserProvider } from './components/UserContext'; // Import UserProvider
 import PriceComparison from './components/CalculatorPage/PriceComparison';
 import AdditionalComponent from './components/CalculatorPage/AdditionalComponent';
 import UniversityList from './components/CalculatorPage/UniversityList';
@@ -17,19 +18,31 @@ import StudentProfile from './components/StudentProfileMyinfo'; // Import Studen
 import StudentOverview from './components/StudentOverview'; // Import StudentOverview component
 import StudentProgress from './components/StudentProgress'; // Import StudentProgress component
 import StudentPick from './components/StudentPick'; // Import StudentPick component
+import Account from './components/Account'; // Import the new Account component
+import ProfileSignIn from './components/ProfileSignIn'; // Import the new ProfileSignIn component
+import StudentProfilePage from './components/StudentProfilePage'; // Import the new Student Profile component
 import './styles.css';
 
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      setIsAuthenticated(true);
+    }
+  }, []);
 
   const handleAuthChange = (authStatus: boolean) => {
     setIsAuthenticated(authStatus);
   };
 
   return (
-    <Router>
-      <Main isAuthenticated={isAuthenticated} onAuthChange={handleAuthChange} />
-    </Router>
+    <UserProvider>
+      <Router>
+        <Main isAuthenticated={isAuthenticated} onAuthChange={handleAuthChange} />
+      </Router>
+    </UserProvider>
   );
 };
 
@@ -49,8 +62,8 @@ const Main: React.FC<MainProps> = ({ isAuthenticated, onAuthChange }) => {
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/auth" element={<AuthPage onAuthChange={onAuthChange} />} />
-            <Route path="/home" element={isAuthenticated ? <HomePage /> : <AuthPage onAuthChange={onAuthChange} />} />
-            <Route path="/price-comparison" element={isAuthenticated ? <PriceComparison /> : <AuthPage onAuthChange={onAuthChange} />} />
+            <Route path="/home" element={isAuthenticated ? <HomePage /> : <Navigate to="/auth" />} />
+            <Route path="/price-comparison" element={isAuthenticated ? <PriceComparison /> : <Navigate to="/auth" />} />
             <Route path="/universities" element={
               <div className="space-y-6 w-full">
                 <UniversityList />
@@ -67,10 +80,13 @@ const Main: React.FC<MainProps> = ({ isAuthenticated, onAuthChange }) => {
             <Route path="/gen-ed-requirements" element={<GenEdRequirementList />} />
             <Route path="/students" element={<StudentList />} />
             <Route path="/combined-schedule" element={<TransferMaxCombinedSchedule />} />
-            <Route path="/student-profile" element={<StudentProfile />} /> {/* New route */}
-            <Route path="/student-overview" element={<StudentOverview />} /> {/* New route */}
-            <Route path="/student-progress" element={<StudentProgress />} /> {/* New route */}
-            <Route path="/student-pick" element={<StudentPick />} /> {/* New route */}
+            <Route path="/student-profile" element={isAuthenticated ? <StudentProfile /> : <Navigate to="/auth" />} />
+            <Route path="/student-overview" element={isAuthenticated ? <StudentOverview /> : <Navigate to="/auth" />} />
+            <Route path="/student-progress" element={isAuthenticated ? <StudentProgress /> : <Navigate to="/auth" />} />
+            <Route path="/student-pick" element={isAuthenticated ? <StudentPick /> : <Navigate to="/auth" />} />
+            <Route path="/account" element={isAuthenticated ? <Account /> : <Navigate to="/auth" />} /> {/* New route */}
+            <Route path="/profile-sign-in" element={isAuthenticated ? <ProfileSignIn /> : <Navigate to="/auth" />} /> {/* New route */}
+            <Route path="/student-profile-page" element={isAuthenticated ? <StudentProfilePage /> : <Navigate to="/auth" />} /> {/* New route */}
           </Routes>
         </div>
       </main>
