@@ -11,7 +11,7 @@ const ProfileSignIn: React.FC = () => {
   const isMediumScreen = useMediaQuery({ query: '(min-width: 768px)' });
   const [isSidebarOpen, setIsSidebarOpen] = useState(isMediumScreen);
   const { user, setUser } = useUser();
-  const [email, setEmail] = useState(user.email);
+  const [email, setEmail] = useState(user?.email || ''); // Default to empty string if user is null
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 

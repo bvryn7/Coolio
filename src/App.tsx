@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from 'react-router-dom';
-import { UserProvider } from './components/UserContext'; // Import UserProvider
+import { UserProvider } from './components/UserContext';
 import PriceComparison from './components/CalculatorPage/PriceComparison';
 import AdditionalComponent from './components/CalculatorPage/AdditionalComponent';
 import UniversityList from './components/CalculatorPage/UniversityList';
@@ -13,14 +14,14 @@ import UniversityCourseList from './components/CalculatorPage/UniversityCourseLi
 import TransferMaxCombinedSchedule from './components/CalculatorPage/TransferMaxCombinedSchedule';
 import LandingPage from './components/LandingPageFolder/LandingPage';
 import AuthPage from './components/AuthPage';
-import HomePage from './components/HomePage'; // Adjusted import path
-import StudentProfile from './components/StudentProfileMyinfo'; // Import StudentProfile component
-import StudentOverview from './components/StudentOverview'; // Import StudentOverview component
-import StudentProgress from './components/StudentProgress'; // Import StudentProgress component
-import StudentPick from './components/StudentPick'; // Import StudentPick component
-import Account from './components/Account'; // Import the new Account component
-import ProfileSignIn from './components/ProfileSignIn'; // Import the new ProfileSignIn component
-import StudentProfilePage from './components/StudentProfilePage'; // Import the new Student Profile component
+import HomePage from './components/HomePage';
+import StudentProfile from './components/StudentProfileMyinfo';
+import StudentOverview from './components/StudentOverview';
+import StudentProgress from './components/StudentProgress';
+import StudentPick from './components/StudentPick';
+import Account from './components/Account';
+import ProfileSignIn from './components/ProfileSignIn';
+import StudentProfilePage from './components/StudentProfilePage';
 import './styles.css';
 
 const App: React.FC = () => {
@@ -84,9 +85,9 @@ const Main: React.FC<MainProps> = ({ isAuthenticated, onAuthChange }) => {
             <Route path="/student-overview" element={isAuthenticated ? <StudentOverview /> : <Navigate to="/auth" />} />
             <Route path="/student-progress" element={isAuthenticated ? <StudentProgress /> : <Navigate to="/auth" />} />
             <Route path="/student-pick" element={isAuthenticated ? <StudentPick /> : <Navigate to="/auth" />} />
-            <Route path="/account" element={isAuthenticated ? <Account /> : <Navigate to="/auth" />} /> {/* New route */}
-            <Route path="/profile-sign-in" element={isAuthenticated ? <ProfileSignIn /> : <Navigate to="/auth" />} /> {/* New route */}
-            <Route path="/student-profile-page" element={isAuthenticated ? <StudentProfilePage /> : <Navigate to="/auth" />} /> {/* New route */}
+            <Route path="/account" element={isAuthenticated ? <Account /> : <Navigate to="/auth" />} />
+            <Route path="/profile-sign-in" element={isAuthenticated ? <ProfileSignIn /> : <Navigate to="/auth" />} />
+            <Route path="/student-profile-page" element={isAuthenticated ? <StudentProfilePage /> : <Navigate to="/auth" />} />
           </Routes>
         </div>
       </main>

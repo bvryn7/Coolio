@@ -1,5 +1,7 @@
 import React, { useState, useEffect, CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios, { AxiosError } from 'axios';
+import { useUser } from './UserContext'; // Import the useUser hook for setting user
 
 interface AuthPageProps {
   onAuthChange: (isAuthenticated: boolean) => void;
@@ -8,50 +10,68 @@ interface AuthPageProps {
 const AuthPage: React.FC<AuthPageProps> = ({ onAuthChange }) => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [name, setName] = useState('');
-  const [contact, setContact] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
+  const { setUser } = useUser(); // Get setUser from context
 
   useEffect(() => {
-    const savedContact = localStorage.getItem('savedContact');
+    const savedEmail = localStorage.getItem('savedEmail');
     const savedPassword = localStorage.getItem('savedPassword');
     const savedRememberMe = localStorage.getItem('savedRememberMe') === 'true';
 
-    if (savedContact && savedPassword && savedRememberMe) {
-      setContact(savedContact);
+    if (savedEmail && savedPassword && savedRememberMe) {
+      setEmail(savedEmail);
       setPassword(savedPassword);
       setRememberMe(savedRememberMe);
     }
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const token = "sampleToken"; // Replace with actual token from server
 
-    if (rememberMe) {
-      localStorage.setItem('savedContact', contact);
-      localStorage.setItem('savedPassword', password);
-      localStorage.setItem('savedRememberMe', 'true');
-    } else {
-      localStorage.removeItem('savedContact');
-      localStorage.removeItem('savedPassword');
-      localStorage.removeItem('savedRememberMe');
+    const endpoint = isSignUp 
+      ? 'http://localhost:8000/api/signup/' 
+      : 'http://localhost:8000/api/login/';
+    
+    const payload = isSignUp
+      ? { name, email, password }  // Sending name, email, and password for signup
+      : { email, password }; // Sending email and password for login
+
+    if (endpoint && payload) {
+      try {
+        const response = await axios.post(endpoint, payload);
+        const userData = response.data; // Capture complete user data
+
+        // Save user data to local storage
+        localStorage.setItem('userId', userData.id);
+        localStorage.setItem('authToken', userData.token); // Assuming the backend returns a token
+
+        if (rememberMe) {
+          localStorage.setItem('savedEmail', email);
+          localStorage.setItem('savedPassword', password);
+          localStorage.setItem('savedRememberMe', 'true');
+        } else {
+          localStorage.removeItem('savedEmail');
+          localStorage.removeItem('savedPassword');
+          localStorage.removeItem('savedRememberMe');
+        }
+
+        // Update user context with user data
+        setUser(userData); // Set the user data in context
+
+        onAuthChange(true);
+        navigate('/home');
+      } catch (error) {
+        console.error('Error during authentication', error);
+        if (axios.isAxiosError(error) && error.response) {
+          alert(`Authentication failed: ${error.response.data.message}`);
+        } else {
+          alert('Authentication failed. Please, try again.');
+        }
+      }
     }
-
-    localStorage.setItem('authToken', token); // Save token
-    onAuthChange(true);
-    navigate('/home');
-  };
-
-  const validateEmail = (email: string) => {
-    const re = /\S+@\S+\.\S+/;
-    return re.test(email);
-  };
-
-  const validatePhone = (phone: string) => {
-    const re = /^\d{10}$/;
-    return re.test(phone);
   };
 
   return (
@@ -83,12 +103,12 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuthChange }) => {
             </label>
           )}
           <label style={labelStyle}>
-            Email or Phone:
+            Email:
             <input
               style={inputStyle}
-              type="text"
-              value={contact}
-              onChange={(e) => setContact(e.target.value)}
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </label>
@@ -145,7 +165,6 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuthChange }) => {
     </div>
   );
 };
-
 const pageStyle: CSSProperties = {
   display: 'flex',
   justifyContent: 'center',

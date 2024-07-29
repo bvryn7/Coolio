@@ -1,0 +1,13 @@
+
+// Make sure this path correctly points to where your context is defined
+import { User } from '../components/UserContext';
+
+export const saveProfile = async (profileData: User): Promise<User> => {
+  // Simulate a delay for the asynchronous call
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      console.log('Profile data saved (mock):', profileData);
+      resolve(profileData); // Resolve with the same data
+    }, 1000);
+  });
+};

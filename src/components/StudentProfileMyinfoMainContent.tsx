@@ -1,17 +1,27 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, RefObject } from 'react';
 import { Box, Button } from '@mantine/core';
-import Select from 'react-select';
+import Select, { SingleValue } from 'react-select';
 import { useNavigate } from 'react-router-dom';
-import { useUser } from './UserContext';
+import { useUser, User } from './UserContext';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import SchoolIcon from '@mui/icons-material/School';
 import UniversityIcon from '@mui/icons-material/Apartment';
-import StateIcon from '@mui/icons-material/LocationCity'; // Placeholder icon for state
+import StateIcon from '@mui/icons-material/LocationCity';
 import ConfettiAnimation from './ConfettiAnimation';
-import '../styles.css'; // Adjust the path if necessary
+import '../styles.css';
+import axios from 'axios';
+import { states } from '../constants/states';
+import { universities } from '../constants/universities';
+
+const normalizeStateOrGrade = (value: string | null): string | undefined => value ?? undefined;
+
+interface SelectOption {
+  value: string;
+  label: string;
+}
 
 const StudentProfileMyinfoMainContent: React.FC = () => {
-  const { user } = useUser();
+  const { user, setUser } = useUser();
   const navigate = useNavigate();
   const [selectedButton, setSelectedButton] = useState<string | null>(null);
   const [selectedState, setSelectedState] = useState<string | null>(null);
@@ -20,16 +30,16 @@ const StudentProfileMyinfoMainContent: React.FC = () => {
   const [showSecondQuestion, setShowSecondQuestion] = useState(false);
   const [showThirdQuestion, setShowThirdQuestion] = useState(false);
   const [showEligibilityMessage, setShowEligibilityMessage] = useState(false);
-  const [selectedUniversity, setSelectedUniversity] = useState<{ value: string; label: string } | null>(null);
+  const [selectedUniversity, setSelectedUniversity] = useState<SelectOption | null>(null);
   const [confettiVisible, setConfettiVisible] = useState(false);
-  const [scrollTo, setScrollTo] = useState<React.RefObject<HTMLDivElement> | null>(null);
+  const [scrollTo, setScrollTo] = useState<RefObject<HTMLDivElement> | null>(null);
 
   const stateQuestionRef = useRef<HTMLDivElement>(null);
   const secondQuestionRef = useRef<HTMLDivElement>(null);
   const thirdQuestionRef = useRef<HTMLDivElement>(null);
   const eligibilityMessageRef = useRef<HTMLDivElement>(null);
 
-  const smoothScrollTo = (ref: React.RefObject<HTMLDivElement>, duration: number) => {
+  const smoothScrollTo = (ref: RefObject<HTMLDivElement>, duration: number) => {
     if (!ref.current) return;
     const element = ref.current;
     const start = window.pageYOffset;
@@ -59,8 +69,8 @@ const StudentProfileMyinfoMainContent: React.FC = () => {
 
   useEffect(() => {
     if (scrollTo) {
-      smoothScrollTo(scrollTo, 2000); // 2 seconds duration for smoother and faster scroll
-      setScrollTo(null); // Reset scrollTo to prevent repeated scrolling
+      smoothScrollTo(scrollTo, 2000);
+      setScrollTo(null);
     }
   }, [scrollTo]);
 
@@ -70,39 +80,91 @@ const StudentProfileMyinfoMainContent: React.FC = () => {
     setScrollTo(stateQuestionRef);
   };
 
-  const handleStateChange = (newValue: { value: string; label: string } | null) => {
-    setSelectedState(newValue ? newValue.value : null);
+  const handleStateChange = async (newValue: SingleValue<SelectOption>) => {
+    const newState = normalizeStateOrGrade(newValue?.value ?? null);
+    setSelectedState(newState ?? null);
     setShowSecondQuestion(true);
     setScrollTo(secondQuestionRef);
+
+    if (newState && user && user.id) {
+      try {
+        const updatedStudentInfo = {
+          homestate: newState,
+          name: user.name,
+          email: user.email
+        };
+        
+        const response = await axios.patch(`http://localhost:8000/api/students/${user.id}/`, updatedStudentInfo);
+        
+        setUser({ ...user, homestate: newState });
+      } catch (error: any) {
+        console.error('Failed to save state:', error.response ? error.response.data : error.message);
+      }
+    } else {
+      console.error('User or user.id is undefined', user);
+    }
   };
 
   const handleGradeClick = (grade: string) => {
-    setSelectedGrade(grade);
+    const newGrade = normalizeStateOrGrade(grade);
+    setSelectedGrade(newGrade ?? null);
     setShowThirdQuestion(true);
     setScrollTo(thirdQuestionRef);
   };
 
-  const handleUniversityChange = (newValue: { value: string; label: string } | null) => {
+  const handleUniversityChange = async (newValue: SingleValue<SelectOption>) => {
     setSelectedUniversity(newValue);
-    if (newValue) {
+    if (newValue && user && user.id) {
       setShowEligibilityMessage(true);
-      setConfettiVisible(true); // Show confetti animation immediately
-      setScrollTo(eligibilityMessageRef); // Scroll to eligibility message
+      setConfettiVisible(true);
+      setScrollTo(eligibilityMessageRef);
+
+      try {
+        const updatedStudent = {
+          university: newValue.value,
+          name: user.name,
+          email: user.email
+        };
+        
+        const responseStudent = await axios.patch(`http://localhost:8000/api/students/${user.id}/`, updatedStudent);
+        
+        setUser({ ...user, university: newValue.value });
+      } catch (error: any) {
+        console.error('Failed to save university:', error.response ? error.response.data : error.message);
+      }
+    } else {
+      console.error('User or user.id is undefined', user);
     }
   };
 
-  const states = [
-    { value: 'california', label: 'California' },
-    { value: 'texas', label: 'Texas' },
-    { value: 'newyork', label: 'New York' },
-    // Add more states as needed
-  ];
+  useEffect(() => {
+    const saveProfile = async () => {
+      if (!user) return;
 
-  const universities = [
-    { value: 'universityA', label: 'University A' },
-    { value: 'universityB', label: 'University B' },
-    { value: 'universityC', label: 'University C' },
-  ];
+      const profileData: User = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        university: selectedUniversity?.value,
+        homestate: normalizeStateOrGrade(selectedState),
+        grade: normalizeStateOrGrade(selectedGrade),
+      };
+
+      try {
+        const response = await axios.patch(
+          `http://localhost:8000/api/students/${user.id}/`,
+          profileData
+        );
+        setUser(response.data);
+      } catch (error: any) {
+        console.error('Failed to save profile:', error);
+      }
+    };
+
+    if (selectedUniversity || selectedState || selectedGrade) {
+      saveProfile();
+    }
+  }, [selectedUniversity, selectedState, selectedGrade, user, setUser]);
 
   return (
     <Box className="container mx-auto p-8 text-center">
@@ -111,29 +173,23 @@ const StudentProfileMyinfoMainContent: React.FC = () => {
         <AssignmentIcon style={{ fontSize: 80, color: '#003478' }} />
       </div>
       <p className="text-lg mb-8 text-gray-700">Are you a current High School Student, Prospective College Student, or Current College Student?</p>
-      <div className="flex flex-col items-center space-y-6"> {/* Increased spacing */}
+      <div className="flex flex-col items-center space-y-6">
         <Button
-          className={`bg-white text-black border border-gray-300 hover:bg-gray-50 rounded-lg px-8 py-4 font-medium transition-all ${
-            selectedButton === 'highSchool' ? 'bg-green-200 border-green-400 text-green-600' : ''
-          }`}
+          className={`bg-white text-black border border-gray-300 hover:bg-gray-50 rounded-lg px-8 py-4 font-medium transition-all ${selectedButton === 'highSchool' ? 'bg-green-200 border-green-400 text-green-600' : ''}`}
           style={{ width: '350px', fontSize: '18px' }}
           onClick={() => handleButtonClick('highSchool')}
         >
           High School Student
         </Button>
         <Button
-          className={`bg-white text-black border border-gray-300 hover:bg-gray-50 rounded-lg px-8 py-4 font-medium transition-all ${
-            selectedButton === 'prospective' ? 'bg-green-200 border-green-400 text-green-600' : ''
-          }`}
+          className={`bg-white text-black border border-gray-300 hover:bg-gray-50 rounded-lg px-8 py-4 font-medium transition-all ${selectedButton === 'prospective' ? 'bg-green-200 border-green-400 text-green-600' : ''}`}
           style={{ width: '350px', fontSize: '18px' }}
           onClick={() => handleButtonClick('prospective')}
         >
           Prospective College Student
         </Button>
         <Button
-          className={`bg-white text-black border border-gray-300 hover:bg-gray-50 rounded-lg px-8 py-4 font-medium transition-all ${
-            selectedButton === 'currentCollege' ? 'bg-green-200 border-green-400 text-green-600' : ''
-          }`}
+          className={`bg-white text-black border border-gray-300 hover:bg-gray-50 rounded-lg px-8 py-4 font-medium transition-all ${selectedButton === 'currentCollege' ? 'bg-green-200 border-green-400 text-green-600' : ''}`}
           style={{ width: '350px', fontSize: '18px' }}
           onClick={() => handleButtonClick('currentCollege')}
         >
@@ -153,11 +209,11 @@ const StudentProfileMyinfoMainContent: React.FC = () => {
               onChange={handleStateChange}
               placeholder="Enter your state"
               styles={{
-                control: (provided) => ({ ...provided, borderColor: '#000000' }), // Changed to black
+                control: (provided) => ({ ...provided, borderColor: '#000000' }),
                 option: (provided, state) => ({
                   ...provided,
                   backgroundColor: state.isSelected ? '#000000' : provided.backgroundColor,
-                  color: state.isSelected ? '#ffffff' : provided.color, // Ensure selected option is visible
+                  color: state.isSelected ? '#ffffff' : provided.color,
                 }),
               }}
             />
@@ -170,47 +226,37 @@ const StudentProfileMyinfoMainContent: React.FC = () => {
           <div className="flex justify-center mb-4">
             <SchoolIcon style={{ fontSize: 60, color: '#003478' }} />
           </div>
-          <div className="flex flex-col items-center space-y-6"> {/* Increased spacing */}
+          <div className="flex flex-col items-center space-y-6">
             <Button
-              className={`bg-white text-black border border-gray-300 hover:bg-gray-50 rounded-lg px-8 py-4 font-medium transition-all ${
-                selectedGrade === 'freshman' ? 'bg-green-200 border-green-400 text-green-600' : ''
-              }`}
+              className={`bg-white text-black border border-gray-300 hover:bg-gray-50 rounded-lg px-8 py-4 font-medium transition-all ${selectedGrade === 'freshman' ? 'bg-green-200 border-green-400 text-green-600' : ''}`}
               style={{ width: '350px', fontSize: '18px' }}
               onClick={() => handleGradeClick('freshman')}
             >
               Freshman
             </Button>
             <Button
-              className={`bg-white text-black border border-gray-300 hover:bg-gray-50 rounded-lg px-8 py-4 font-medium transition-all ${
-                selectedGrade === 'sophomore' ? 'bg-green-200 border-green-400 text-green-600' : ''
-              }`}
+              className={`bg-white text-black border border-gray-300 hover:bg-gray-50 rounded-lg px-8 py-4 font-medium transition-all ${selectedGrade === 'sophomore' ? 'bg-green-200 border-green-400 text-green-600' : ''}`}
               style={{ width: '350px', fontSize: '18px' }}
               onClick={() => handleGradeClick('sophomore')}
             >
               Sophomore
             </Button>
             <Button
-              className={`bg-white text-black border border-gray-300 hover:bg-gray-50 rounded-lg px-8 py-4 font-medium transition-all ${
-                selectedGrade === 'junior' ? 'bg-green-200 border-green-400 text-green-600' : ''
-              }`}
+              className={`bg-white text-black border border-gray-300 hover:bg-gray-50 rounded-lg px-8 py-4 font-medium transition-all ${selectedGrade === 'junior' ? 'bg-green-200 border-green-400 text-green-600' : ''}`}
               style={{ width: '350px', fontSize: '18px' }}
               onClick={() => handleGradeClick('junior')}
             >
               Junior
             </Button>
             <Button
-              className={`bg-white text-black border border-gray-300 hover:bg-gray-50 rounded-lg px-8 py-4 font-medium transition-all ${
-                selectedGrade === 'senior' ? 'bg-green-200 border-green-400 text-green-600' : ''
-              }`}
+              className={`bg-white text-black border border-gray-300 hover:bg-gray-50 rounded-lg px-8 py-4 font-medium transition-all ${selectedGrade === 'senior' ? 'bg-green-200 border-green-400 text-green-600' : ''}`}
               style={{ width: '350px', fontSize: '18px' }}
               onClick={() => handleGradeClick('senior')}
             >
               Senior
             </Button>
             <Button
-              className={`bg-white text-black border border-gray-300 hover:bg-gray-50 rounded-lg px-8 py-4 font-medium transition-all ${
-                selectedGrade === 'seniorPlus' ? 'bg-green-200 border-green-400 text-green-600' : ''
-              }`}
+              className={`bg-white text-black border border-gray-300 hover:bg-gray-50 rounded-lg px-8 py-4 font-medium transition-all ${selectedGrade === 'seniorPlus' ? 'bg-green-200 border-green-400 text-green-600' : ''}`}
               style={{ width: '350px', fontSize: '18px' }}
               onClick={() => handleGradeClick('seniorPlus')}
             >
@@ -236,11 +282,11 @@ const StudentProfileMyinfoMainContent: React.FC = () => {
               onChange={handleUniversityChange}
               placeholder="Enter your university"
               styles={{
-                control: (provided) => ({ ...provided, borderColor: '#000000' }), // Changed to black
+                control: (provided) => ({ ...provided, borderColor: '#000000' }),
                 option: (provided, state) => ({
                   ...provided,
                   backgroundColor: state.isSelected ? '#000000' : provided.backgroundColor,
-                  color: state.isSelected ? '#ffffff' : provided.color, // Ensure selected option is visible
+                  color: state.isSelected ? '#ffffff' : provided.color,
                 }),
               }}
             />
@@ -254,7 +300,7 @@ const StudentProfileMyinfoMainContent: React.FC = () => {
               <ConfettiAnimation />
             </div>
           )}
-          <p className="text-lg text-gray-800 mt-4"> {/* Smaller and not bold */}
+          <p className="text-lg text-gray-800 mt-4">
             Congratulations! You are eligible to save up to{' '}
             <span className="text-green-500 animate-bounce">$20,000</span> at{' '}
             {selectedUniversity?.label} by transferring in community college courses.

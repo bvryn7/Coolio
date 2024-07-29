@@ -1,29 +1,29 @@
-import React, { createContext, useContext, useState } from 'react';
 
-// Define the User type
-type User = {
+import React, { createContext, useContext, useState, ReactNode } from 'react';
+
+// Define the User type and export it
+export type User = {
+  id: number;
   name: string;
   email: string;
-  university?: string; // Add optional university property
-  state?: string;      // Add optional state property
-  grade?: string;      // Add optional grade property
+  university?: string;
+  state?: string;
+  grade?: string;
+  homestate?: string;
 };
 
 // Define the context types
 type UserContextType = {
-  user: User;
-  setUser: React.Dispatch<React.SetStateAction<User>>;
+  user: User | null;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
 };
 
 // Create the context
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 // Create a provider component
-export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User>({
-    name: 'Benjamin',
-    email: 'benjamin@example.com',
-  });
+export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null); // Initialize user as null
 
   return (
     <UserContext.Provider value={{ user, setUser }}>
