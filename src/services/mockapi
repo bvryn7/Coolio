@@ -1,13 +1,19 @@
 
-// Make sure this path correctly points to where your context is defined
-import { User } from '../components/UserContext';
+// src/services/genEdRequirementService.ts
+import axiosInstance from '../axiosConfig';
 
-export const saveProfile = async (profileData: User): Promise<User> => {
-  // Simulate a delay for the asynchronous call
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      console.log('Profile data saved (mock):', profileData);
-      resolve(profileData); // Resolve with the same data
-    }, 1000);
-  });
+// Interface for GenEd Requirement model
+interface IGenEdRequirement {
+  gen_ed_id?: number;
+  requirement_name: string;
+}
+
+// Get all GenEd requirements
+export const getGenEdRequirements = async () => {
+  try {
+    const response = await axiosInstance.get('gen_ed_requirements/');
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
 };

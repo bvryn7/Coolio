@@ -1,23 +1,25 @@
-// src/components/StudentPick.tsx
 import React, { useState, useEffect } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
-import { Box, Button, Select } from '@mantine/core';
+import { NavLink } from 'react-router-dom';
+import { Box, Button } from '@mantine/core';
 import { useMediaQuery } from 'react-responsive';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 import HomeIcon from '@mui/icons-material/Home';
-import DashboardIcon from '@mui/icons-material/Dashboard';
+import DescriptionIcon from '@mui/icons-material/Dashboard';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
-import SimpleWhiteHeader from './SimpleWhiteHeader';
-import ProgressBar from './ProgressBar';
-import NextPrev from './NextPrev';
-import { useUser, User } from './UserContext'; // Import the context and User type
+import SimpleWhiteHeader from '../SimpleWhiteHeader';
+import ProgressBar from '../ProgressBar';
+import NextPrev from '../NextPrev';
+import SchoolIcon from '@mui/icons-material/School';
+import ScienceIcon from '@mui/icons-material/Science';
+import PaletteIcon from '@mui/icons-material/Palette';
+import CalculateIcon from '@mui/icons-material/Calculate';
+import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
+import PublicIcon from '@mui/icons-material/Public';
 
-const StudentPick: React.FC = () => {
+const CMUOverview: React.FC = () => {
   const isMediumScreen = useMediaQuery({ query: '(min-width: 768px)' });
   const [isSidebarOpen, setIsSidebarOpen] = useState(isMediumScreen);
-  const { user, setUser } = useUser(); // Use the context
-  const navigate = useNavigate();
 
   useEffect(() => {
     setIsSidebarOpen(isMediumScreen);
@@ -27,16 +29,14 @@ const StudentPick: React.FC = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const handleUniversityChange = (value: string | null) => {
-    if (value !== null && user) {
-      const updatedUser: User = {
-        ...user,
-        university: value,
-      };
-      setUser(updatedUser);
-      navigate('/student-overview'); // Navigate to student overview after selecting university
-    }
-  };
+  const requirements = [
+    { id: 1, requirement_name: 'Humanities', credits_required: 3, icon: <SchoolIcon />, color: 'bg-red-300' },
+    { id: 2, requirement_name: 'Earth Science', credits_required: 3, icon: <PublicIcon />, color: 'bg-green-300' },
+    { id: 3, requirement_name: 'Natural Science', credits_required: 3, icon: <ScienceIcon />, color: 'bg-blue-300' },
+    { id: 4, requirement_name: 'Arts', credits_required: 3, icon: <PaletteIcon />, color: 'bg-yellow-300' },
+    { id: 5, requirement_name: 'Quantitative', credits_required: 3, icon: <CalculateIcon />, color: 'bg-purple-300' },
+    { id: 6, requirement_name: 'Physical Science', credits_required: 3, icon: <FitnessCenterIcon />, color: 'bg-orange-300' },
+  ];
 
   return (
     <Box className="min-h-screen flex bg-white">
@@ -67,7 +67,7 @@ const StudentPick: React.FC = () => {
                 isActive ? 'flex items-center space-x-2 bg-gray-200 p-2 w-full' : 'flex items-center space-x-2 p-2 w-full'
               }
             >
-              <DashboardIcon />
+              <DescriptionIcon />
               {isSidebarOpen && <span>Dashboard</span>}
             </NavLink>
             <NavLink
@@ -83,7 +83,8 @@ const StudentPick: React.FC = () => {
         </div>
         <div className="mt-auto">
           <NavLink
-            to="/signin"
+            to="/auth"
+            onClick={() => localStorage.removeItem('authToken')}
             className={({ isActive }) =>
               isActive ? 'flex items-center space-x-2 bg-gray-200 p-2 w-full' : 'flex items-center space-x-2 p-2 w-full'
             }
@@ -99,22 +100,29 @@ const StudentPick: React.FC = () => {
         <SimpleWhiteHeader />
         <ProgressBar />
         <Box className="flex-grow p-8">
-          <h1 className="text-3xl font-bold mb-4">Student Pick</h1>
-          <p>Welcome to the Student Pick page!</p>
-          <Select
-            placeholder="Select your university"
-            onChange={(value: string | null) => handleUniversityChange(value)}
-            data={[
-              { value: '1', label: 'Grand Valley State University' },
-              { value: '2', label: 'Central Michigan University' },
-              // Add other universities as needed
-            ]}
-          />
-          <NextPrev nextLink="/price-comparison" prevLink="/student-progress" /> {/* Update the nextLink and prevLink */}
+          <h1 className="text-3xl font-bold mb-4 text-center">CMU Overview</h1>
+          <p className="text-center">Welcome to the Central Michigan University Overview page!</p>
+          
+          {/* Add vertical bars */}
+          <Box className="flex space-x-8 mt-8 justify-center items-end">
+            {requirements.map((req) => (
+              <Box key={req.id} className="flex flex-col items-center">
+                <span className="text-gray-800 text-sm mb-2">{req.credits_required} credits</span>
+                <Box className={`relative flex flex-col justify-end items-center ${req.color} border-4 border-gray-600 h-64 w-10 rounded-lg transform hover:scale-105 transition-transform duration-300`}>
+                  {req.icon}
+                  {Array.from({ length: 5 }, (_, i) => (
+                    <Box key={i} className="w-full border-t-2 border-black" style={{ height: '20%' }}></Box>
+                  ))}
+                </Box>
+                <span className="text-gray-800 text-lg mt-2 flex items-center">{req.requirement_name}</span>
+              </Box>
+            ))}
+          </Box>
+          <NextPrev nextLink="/student-progress" prevLink="/student-profile" />
         </Box>
       </Box>
     </Box>
   );
 };
 
-export default StudentPick;
+export default CMUOverview;

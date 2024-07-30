@@ -1,10 +1,9 @@
-
+// src/App.tsx
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from 'react-router-dom';
 import { UserProvider } from './components/UserContext';
 import PriceComparison from './components/CalculatorPage/PriceComparison';
 import AdditionalComponent from './components/CalculatorPage/AdditionalComponent';
-import UniversityList from './components/CalculatorPage/UniversityList';
 import CommunityCollegeList from './components/CalculatorPage/CommunityCollegeList';
 import CommunityCollegeCourseList from './components/CalculatorPage/CommunityCollegeCourseList';
 import CourseEnrollmentList from './components/CalculatorPage/CourseEnrollmentList';
@@ -22,6 +21,9 @@ import StudentPick from './components/StudentPick';
 import Account from './components/Account';
 import ProfileSignIn from './components/ProfileSignIn';
 import StudentProfilePage from './components/StudentProfilePage';
+import StudentProfileMyinfoMainContent from './components/StudentProfileMyinfoMainContent';
+import GVSUOverview from './components/UniversityOverviewFolder/GVSUOverview';
+import CMUOverview from './components/UniversityOverviewFolder/CMUOverview';
 import './styles.css';
 
 const App: React.FC = () => {
@@ -67,7 +69,6 @@ const Main: React.FC<MainProps> = ({ isAuthenticated, onAuthChange }) => {
             <Route path="/price-comparison" element={isAuthenticated ? <PriceComparison /> : <Navigate to="/auth" />} />
             <Route path="/universities" element={
               <div className="space-y-6 w-full">
-                <UniversityList />
                 <div className="bg-white p-6 rounded-lg shadow h-full w-full" style={{ borderRadius: '16px' }}>
                   <PriceComparison />
                 </div>
@@ -88,6 +89,8 @@ const Main: React.FC<MainProps> = ({ isAuthenticated, onAuthChange }) => {
             <Route path="/account" element={isAuthenticated ? <Account /> : <Navigate to="/auth" />} />
             <Route path="/profile-sign-in" element={isAuthenticated ? <ProfileSignIn /> : <Navigate to="/auth" />} />
             <Route path="/student-profile-page" element={isAuthenticated ? <StudentProfilePage /> : <Navigate to="/auth" />} />
+            <Route path="/gvsu-overview" element={<GVSUOverview />} />
+            <Route path="/cmu-overview" element={<CMUOverview />} />
           </Routes>
         </div>
       </main>

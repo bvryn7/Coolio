@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { Box, Button } from '@mantine/core';
 import { useMediaQuery } from 'react-responsive';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
@@ -7,13 +7,16 @@ import HomeIcon from '@mui/icons-material/Home';
 import DescriptionIcon from '@mui/icons-material/Dashboard';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
-import SimpleWhiteHeader from './SimpleWhiteHeader'; // Correct path to the SimpleWhiteHeader component
-import ProgressBar from './ProgressBar'; // Import ProgressBar component
-import NextPrev from './NextPrev'; // Import the NextPrev component
+import SimpleWhiteHeader from './SimpleWhiteHeader';
+import ProgressBar from './ProgressBar';
+import NextPrev from './NextPrev';
+import { useUser } from './UserContext'; // Import the context
 
 const StudentOverview: React.FC = () => {
   const isMediumScreen = useMediaQuery({ query: '(min-width: 768px)' });
   const [isSidebarOpen, setIsSidebarOpen] = useState(isMediumScreen);
+  const { user } = useUser(); // Use the context
+  const navigate = useNavigate();
 
   useEffect(() => {
     setIsSidebarOpen(isMediumScreen);
@@ -22,6 +25,18 @@ const StudentOverview: React.FC = () => {
   const handleSidebarToggle = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
+
+  useEffect(() => {
+    if (user?.university) {
+      const universityId = parseInt(user.university, 10);
+      if (universityId === 1) {
+        navigate('/gvsu-overview');
+      } else if (universityId === 2) {
+        navigate('/cmu-overview');
+      }
+      // Add other university ID checks and corresponding navigation here
+    }
+  }, [user, navigate]);
 
   return (
     <Box className="min-h-screen flex bg-white">
@@ -82,12 +97,12 @@ const StudentOverview: React.FC = () => {
 
       {/* Main content */}
       <Box className="flex-1 flex flex-col bg-white">
-        <SimpleWhiteHeader /> {/* Include the updated SimpleWhiteHeader component */}
-        <ProgressBar /> {/* Include the ProgressBar component */}
+        <SimpleWhiteHeader />
+        <ProgressBar />
         <Box className="flex-grow p-8">
           <h1 className="text-3xl font-bold mb-4">Student Overview</h1>
           <p>Welcome to the Student Overview page!</p>
-          <NextPrev nextLink="/student-progress" prevLink="/student-profile" /> {/* Update the nextLink and prevLink */}
+          <NextPrev nextLink="/student-progress" prevLink="/student-profile" />
         </Box>
       </Box>
     </Box>

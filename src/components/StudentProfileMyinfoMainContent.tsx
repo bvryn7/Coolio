@@ -10,8 +10,16 @@ import StateIcon from '@mui/icons-material/LocationCity';
 import ConfettiAnimation from './ConfettiAnimation';
 import '../styles.css';
 import axios from 'axios';
-import { states } from '../constants/states';
-import { universities } from '../constants/universities';
+import { getUniversities, getStates, University, State } from '../services/universityService';
+import {
+  buttonStyle,
+  selectedButtonStyle,
+  selectStyles,
+  containerStyle,
+  headingStyle,
+  subHeadingStyle,
+  questionHeadingStyle,
+} from './StudentProfileMyinfoMainContentStyles';
 
 const normalizeStateOrGrade = (value: string | null): string | undefined => value ?? undefined;
 
@@ -24,7 +32,7 @@ const StudentProfileMyinfoMainContent: React.FC = () => {
   const { user, setUser } = useUser();
   const navigate = useNavigate();
   const [selectedButton, setSelectedButton] = useState<string | null>(null);
-  const [selectedState, setSelectedState] = useState<string | null>(null);
+  const [selectedState, setSelectedState] = useState<SelectOption | null>(null);
   const [selectedGrade, setSelectedGrade] = useState<string | null>(null);
   const [showStateQuestion, setShowStateQuestion] = useState(false);
   const [showSecondQuestion, setShowSecondQuestion] = useState(false);
@@ -33,46 +41,44 @@ const StudentProfileMyinfoMainContent: React.FC = () => {
   const [selectedUniversity, setSelectedUniversity] = useState<SelectOption | null>(null);
   const [confettiVisible, setConfettiVisible] = useState(false);
   const [scrollTo, setScrollTo] = useState<RefObject<HTMLDivElement> | null>(null);
+  const [universities, setUniversities] = useState<SelectOption[]>([]);
+  const [states, setStates] = useState<SelectOption[]>([]);
 
   const stateQuestionRef = useRef<HTMLDivElement>(null);
   const secondQuestionRef = useRef<HTMLDivElement>(null);
   const thirdQuestionRef = useRef<HTMLDivElement>(null);
   const eligibilityMessageRef = useRef<HTMLDivElement>(null);
 
-  const smoothScrollTo = (ref: RefObject<HTMLDivElement>, duration: number) => {
-    if (!ref.current) return;
-    const element = ref.current;
-    const start = window.pageYOffset;
-    const end = element.getBoundingClientRect().top + window.pageYOffset - 50;
-    const change = end - start;
-    let currentTime = 0;
-    const increment = 20;
-
-    const easeInOutQuad = (t: number, b: number, c: number, d: number) => {
-      t /= d / 2;
-      if (t < 1) return (c / 2) * t * t + b;
-      t--;
-      return (-c / 2) * (t * (t - 2) - 1) + b;
-    };
-
-    const animateScroll = () => {
-      currentTime += increment;
-      const val = easeInOutQuad(currentTime, start, change, duration);
-      window.scrollTo(0, val);
-      if (currentTime < duration) {
-        setTimeout(animateScroll, increment);
+  useEffect(() => {
+    const fetchUniversities = async () => {
+      try {
+        const data = await getUniversities();
+        const options = data.map((university: University) => ({
+          value: university.id.toString(),
+          label: university.name,
+        }));
+        setUniversities(options);
+      } catch (error) {
+        console.error('Failed to fetch universities', error);
       }
     };
 
-    animateScroll();
-  };
+    const fetchStates = async () => {
+      try {
+        const data = await getStates();
+        const options = data.map((state: State) => ({
+          value: state.id.toString(),
+          label: state.name,
+        }));
+        setStates(options);
+      } catch (error) {
+        console.error('Failed to fetch states', error);
+      }
+    };
 
-  useEffect(() => {
-    if (scrollTo) {
-      smoothScrollTo(scrollTo, 2000);
-      setScrollTo(null);
-    }
-  }, [scrollTo]);
+    fetchUniversities();
+    fetchStates();
+  }, []);
 
   const handleButtonClick = (button: string) => {
     setSelectedButton(button);
@@ -81,21 +87,24 @@ const StudentProfileMyinfoMainContent: React.FC = () => {
   };
 
   const handleStateChange = async (newValue: SingleValue<SelectOption>) => {
-    const newState = normalizeStateOrGrade(newValue?.value ?? null);
-    setSelectedState(newState ?? null);
+    setSelectedState(newValue ?? null);
     setShowSecondQuestion(true);
     setScrollTo(secondQuestionRef);
 
+    const newState = newValue?.value ?? undefined;
     if (newState && user && user.id) {
       try {
         const updatedStudentInfo = {
-          homestate: newState,
+          homestate: newState, // Ensure it's a string
           name: user.name,
-          email: user.email
+          email: user.email,
         };
-        
-        const response = await axios.patch(`http://localhost:8000/api/students/${user.id}/`, updatedStudentInfo);
-        
+
+        const response = await axios.patch(
+          `http://localhost:8000/api/students/${user.id}/`,
+          updatedStudentInfo
+        );
+
         setUser({ ...user, homestate: newState });
       } catch (error: any) {
         console.error('Failed to save state:', error.response ? error.response.data : error.message);
@@ -123,11 +132,14 @@ const StudentProfileMyinfoMainContent: React.FC = () => {
         const updatedStudent = {
           university: newValue.value,
           name: user.name,
-          email: user.email
+          email: user.email,
         };
-        
-        const responseStudent = await axios.patch(`http://localhost:8000/api/students/${user.id}/`, updatedStudent);
-        
+
+        const responseStudent = await axios.patch(
+          `http://localhost:8000/api/students/${user.id}/`,
+          updatedStudent
+        );
+
         setUser({ ...user, university: newValue.value });
       } catch (error: any) {
         console.error('Failed to save university:', error.response ? error.response.data : error.message);
@@ -146,8 +158,8 @@ const StudentProfileMyinfoMainContent: React.FC = () => {
         name: user.name,
         email: user.email,
         university: selectedUniversity?.value,
-        homestate: normalizeStateOrGrade(selectedState),
-        grade: normalizeStateOrGrade(selectedGrade),
+        homestate: selectedState ? selectedState.value : undefined, // Ensure it's a string
+        grade: normalizeStateOrGrade(selectedGrade) ?? undefined,
       };
 
       try {
@@ -167,30 +179,38 @@ const StudentProfileMyinfoMainContent: React.FC = () => {
   }, [selectedUniversity, selectedState, selectedGrade, user, setUser]);
 
   return (
-    <Box className="container mx-auto p-8 text-center">
-      <h1 className="text-3xl font-semibold mb-4 text-gray-800">Let's dig into your situation to understand it better</h1>
+    <Box className={containerStyle}>
+      <h1 className={headingStyle}>Let's dig into your situation to understand it better</h1>
       <div className="flex justify-center mb-4">
         <AssignmentIcon style={{ fontSize: 80, color: '#003478' }} />
       </div>
-      <p className="text-lg mb-8 text-gray-700">Are you a current High School Student, Prospective College Student, or Current College Student?</p>
+      <p className={subHeadingStyle}>
+        Are you a current High School Student, Prospective College Student, or Current College Student?
+      </p>
       <div className="flex flex-col items-center space-y-6">
         <Button
-          className={`bg-white text-black border border-gray-300 hover:bg-gray-50 rounded-lg px-8 py-4 font-medium transition-all ${selectedButton === 'highSchool' ? 'bg-green-200 border-green-400 text-green-600' : ''}`}
-          style={{ width: '350px', fontSize: '18px' }}
+          className={`bg-white text-black border border-gray-300 hover:bg-gray-50 rounded-lg px-8 py-4 font-medium transition-all ${
+            selectedButton === 'highSchool' ? selectedButtonStyle : ''
+          }`}
+          style={buttonStyle}
           onClick={() => handleButtonClick('highSchool')}
         >
           High School Student
         </Button>
         <Button
-          className={`bg-white text-black border border-gray-300 hover:bg-gray-50 rounded-lg px-8 py-4 font-medium transition-all ${selectedButton === 'prospective' ? 'bg-green-200 border-green-400 text-green-600' : ''}`}
-          style={{ width: '350px', fontSize: '18px' }}
+          className={`bg-white text-black border border-gray-300 hover:bg-gray-50 rounded-lg px-8 py-4 font-medium transition-all ${
+            selectedButton === 'prospective' ? selectedButtonStyle : ''
+          }`}
+          style={buttonStyle}
           onClick={() => handleButtonClick('prospective')}
         >
           Prospective College Student
         </Button>
         <Button
-          className={`bg-white text-black border border-gray-300 hover:bg-gray-50 rounded-lg px-8 py-4 font-medium transition-all ${selectedButton === 'currentCollege' ? 'bg-green-200 border-green-400 text-green-600' : ''}`}
-          style={{ width: '350px', fontSize: '18px' }}
+          className={`bg-white text-black border border-gray-300 hover:bg-gray-50 rounded-lg px-8 py-4 font-medium transition-all ${
+            selectedButton === 'currentCollege' ? selectedButtonStyle : ''
+          }`}
+          style={buttonStyle}
           onClick={() => handleButtonClick('currentCollege')}
         >
           Current College Student
@@ -198,7 +218,7 @@ const StudentProfileMyinfoMainContent: React.FC = () => {
       </div>
       {showStateQuestion && (
         <div ref={stateQuestionRef} className="mt-8">
-          <h2 className="text-2xl font-semibold mb-4 text-gray-800">What state are you from?</h2>
+          <h2 className={questionHeadingStyle}>What state are you from?</h2>
           <div className="flex justify-center mb-4">
             <StateIcon style={{ fontSize: 60, color: '#003478' }} />
           </div>
@@ -208,56 +228,59 @@ const StudentProfileMyinfoMainContent: React.FC = () => {
               options={states}
               onChange={handleStateChange}
               placeholder="Enter your state"
-              styles={{
-                control: (provided) => ({ ...provided, borderColor: '#000000' }),
-                option: (provided, state) => ({
-                  ...provided,
-                  backgroundColor: state.isSelected ? '#000000' : provided.backgroundColor,
-                  color: state.isSelected ? '#ffffff' : provided.color,
-                }),
-              }}
+              styles={selectStyles}
             />
           </div>
         </div>
       )}
       {showSecondQuestion && (
         <div ref={secondQuestionRef} className="mt-8">
-          <h2 className="text-2xl font-semibold mb-4 text-gray-800">What grade are you in?</h2>
+          <h2 className={questionHeadingStyle}>What grade are you in?</h2>
           <div className="flex justify-center mb-4">
             <SchoolIcon style={{ fontSize: 60, color: '#003478' }} />
           </div>
           <div className="flex flex-col items-center space-y-6">
             <Button
-              className={`bg-white text-black border border-gray-300 hover:bg-gray-50 rounded-lg px-8 py-4 font-medium transition-all ${selectedGrade === 'freshman' ? 'bg-green-200 border-green-400 text-green-600' : ''}`}
-              style={{ width: '350px', fontSize: '18px' }}
+              className={`bg-white text-black border border-gray-300 hover:bg-gray-50 rounded-lg px-8 py-4 font-medium transition-all ${
+                selectedGrade === 'freshman' ? selectedButtonStyle : ''
+              }`}
+              style={buttonStyle}
               onClick={() => handleGradeClick('freshman')}
             >
               Freshman
             </Button>
             <Button
-              className={`bg-white text-black border border-gray-300 hover:bg-gray-50 rounded-lg px-8 py-4 font-medium transition-all ${selectedGrade === 'sophomore' ? 'bg-green-200 border-green-400 text-green-600' : ''}`}
-              style={{ width: '350px', fontSize: '18px' }}
+              className={`bg-white text-black border border-gray-300 hover:bg-gray-50 rounded-lg px-8 py-4 font-medium transition-all ${
+                selectedGrade === 'sophomore' ? selectedButtonStyle : ''
+              }`}
+              style={buttonStyle}
               onClick={() => handleGradeClick('sophomore')}
             >
               Sophomore
             </Button>
             <Button
-              className={`bg-white text-black border border-gray-300 hover:bg-gray-50 rounded-lg px-8 py-4 font-medium transition-all ${selectedGrade === 'junior' ? 'bg-green-200 border-green-400 text-green-600' : ''}`}
-              style={{ width: '350px', fontSize: '18px' }}
+              className={`bg-white text-black border border-gray-300 hover:bg-gray-50 rounded-lg px-8 py-4 font-medium transition-all ${
+                selectedGrade === 'junior' ? selectedButtonStyle : ''
+              }`}
+              style={buttonStyle}
               onClick={() => handleGradeClick('junior')}
             >
               Junior
             </Button>
             <Button
-              className={`bg-white text-black border border-gray-300 hover:bg-gray-50 rounded-lg px-8 py-4 font-medium transition-all ${selectedGrade === 'senior' ? 'bg-green-200 border-green-400 text-green-600' : ''}`}
-              style={{ width: '350px', fontSize: '18px' }}
+              className={`bg-white text-black border border-gray-300 hover:bg-gray-50 rounded-lg px-8 py-4 font-medium transition-all ${
+                selectedGrade === 'senior' ? selectedButtonStyle : ''
+              }`}
+              style={buttonStyle}
               onClick={() => handleGradeClick('senior')}
             >
               Senior
             </Button>
             <Button
-              className={`bg-white text-black border border-gray-300 hover:bg-gray-50 rounded-lg px-8 py-4 font-medium transition-all ${selectedGrade === 'seniorPlus' ? 'bg-green-200 border-green-400 text-green-600' : ''}`}
-              style={{ width: '350px', fontSize: '18px' }}
+              className={`bg-white text-black border border-gray-300 hover:bg-gray-50 rounded-lg px-8 py-4 font-medium transition-all ${
+                selectedGrade === 'seniorPlus' ? selectedButtonStyle : ''
+              }`}
+              style={buttonStyle}
               onClick={() => handleGradeClick('seniorPlus')}
             >
               Senior+
@@ -267,7 +290,7 @@ const StudentProfileMyinfoMainContent: React.FC = () => {
       )}
       {showThirdQuestion && (
         <div ref={thirdQuestionRef} className="mt-8">
-          <h2 className="text-2xl font-semibold mb-4 text-gray-800">
+          <h2 className={questionHeadingStyle}>
             {selectedButton === 'currentCollege'
               ? 'What university do you currently attend?'
               : 'What university do you plan to attend?'}
@@ -281,14 +304,7 @@ const StudentProfileMyinfoMainContent: React.FC = () => {
               options={universities}
               onChange={handleUniversityChange}
               placeholder="Enter your university"
-              styles={{
-                control: (provided) => ({ ...provided, borderColor: '#000000' }),
-                option: (provided, state) => ({
-                  ...provided,
-                  backgroundColor: state.isSelected ? '#000000' : provided.backgroundColor,
-                  color: state.isSelected ? '#ffffff' : provided.color,
-                }),
-              }}
+              styles={selectStyles}
             />
           </div>
         </div>

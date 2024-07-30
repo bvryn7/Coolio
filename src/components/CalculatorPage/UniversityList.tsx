@@ -1,5 +1,7 @@
+// src/components/CalculatorPage/UniversityList.tsx
 
-// src/components/UniversityList.tsx
+// Comment out the entire content if you don't need it for now
+/*
 import React, { useEffect, useState } from 'react';
 import { getUniversities } from '../../services/universityService';
 
@@ -43,3 +45,7 @@ const UniversityList: React.FC = () => {
 };
 
 export default UniversityList;
+*/
+
+// Add this to ensure it's treated as a module
+export {};
