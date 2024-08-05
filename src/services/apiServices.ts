@@ -1,21 +1,26 @@
+// src/services/apiServices.ts
+
+// Import axiosInstance if it's needed for other parts of the application.
 import axiosInstance from '../axiosConfig';
 
-export const getUniversities = async () => {
-  const response = await axiosInstance.get('/universitys/');
-  return response.data;
-};
-
-export const getStates = async () => {
-  const response = await axiosInstance.get('/states/');
-  return response.data;
-};
-
+// Mock implementation of saving profile
 export const saveProfile = async (profileData: any) => {
-  try {
-    const response = await axiosInstance.put(`/students/${profileData.id}/`, profileData);
-    return response.data;
-  } catch (error: any) { // Explicitly define the error type
-    console.error('Error saving profile:', error.response ? error.response.data : error.message);
-    throw error;
-  }
+  console.log('Mock saveProfile called with:', profileData);
+  return profileData; // Mock return the profile data
+};
+
+// Mock data for universities
+export const getUniversities = async () => {
+  return [
+    { university_id: 1, name: 'University A' },
+    { university_id: 2, name: 'University B' },
+  ];
+};
+
+// Mock data for states
+export const getStates = async () => {
+  return [
+    { value: 'NY', label: 'New York' },
+    { value: 'CA', label: 'California' },
+  ];
 };

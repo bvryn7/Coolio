@@ -1,7 +1,7 @@
 import React, { useState, useEffect, CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios, { AxiosError } from 'axios';
 import { useUser } from './UserContext'; // Import the useUser hook for setting user
+import { signUp, login } from '../utils/authService';
 
 interface AuthPageProps {
   onAuthChange: (isAuthenticated: boolean) => void;
@@ -31,46 +31,31 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuthChange }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const endpoint = isSignUp 
-      ? 'http://localhost:8000/api/signup/' 
-      : 'http://localhost:8000/api/login/';
-    
-    const payload = isSignUp
-      ? { name, email, password }  // Sending name, email, and password for signup
-      : { email, password }; // Sending email and password for login
+    try {
+      const userData = isSignUp ? await signUp(name, email, password) : await login(email, password);
 
-    if (endpoint && payload) {
-      try {
-        const response = await axios.post(endpoint, payload);
-        const userData = response.data; // Capture complete user data
+      // Save user data to local storage
+      localStorage.setItem('userId', userData.id.toString());
+      localStorage.setItem('authToken', userData.token);
 
-        // Save user data to local storage
-        localStorage.setItem('userId', userData.id);
-        localStorage.setItem('authToken', userData.token); // Assuming the backend returns a token
-
-        if (rememberMe) {
-          localStorage.setItem('savedEmail', email);
-          localStorage.setItem('savedPassword', password);
-          localStorage.setItem('savedRememberMe', 'true');
-        } else {
-          localStorage.removeItem('savedEmail');
-          localStorage.removeItem('savedPassword');
-          localStorage.removeItem('savedRememberMe');
-        }
-
-        // Update user context with user data
-        setUser(userData); // Set the user data in context
-
-        onAuthChange(true);
-        navigate('/home');
-      } catch (error) {
-        console.error('Error during authentication', error);
-        if (axios.isAxiosError(error) && error.response) {
-          alert(`Authentication failed: ${error.response.data.message}`);
-        } else {
-          alert('Authentication failed. Please, try again.');
-        }
+      if (rememberMe) {
+        localStorage.setItem('savedEmail', email);
+        localStorage.setItem('savedPassword', password);
+        localStorage.setItem('savedRememberMe', 'true');
+      } else {
+        localStorage.removeItem('savedEmail');
+        localStorage.removeItem('savedPassword');
+        localStorage.removeItem('savedRememberMe');
       }
+
+      // Update user context with user data
+      setUser(userData); // Set the user data in context
+
+      onAuthChange(true);
+      navigate('/home');
+    } catch (error) {
+      console.error('Error during authentication', error);
+      alert('Authentication failed. Please, try again.');
     }
   };
 
@@ -165,6 +150,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuthChange }) => {
     </div>
   );
 };
+
 const pageStyle: CSSProperties = {
   display: 'flex',
   justifyContent: 'center',

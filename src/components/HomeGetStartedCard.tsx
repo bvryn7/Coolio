@@ -6,13 +6,13 @@ const HomeGetStartedCard: React.FC = () => {
   const navigate = useNavigate();
 
   const handleStartClick = () => {
+    console.log('Start button clicked');
     navigate('/student-profile');
   };
 
   return (
     <div
       className="relative bg-white rounded-xl shadow-lg w-[649px] h-[499px] flex flex-col items-center justify-end mx-0 ml-28 border-4 border-[#003478] pb-8 mt-10"
-      // Adjusted ml-28 to move it slightly to the right from ml-24
     >
       <div
         className="absolute top-4 left-4 border border-[#003478] text-[#003478] px-2 py-1 rounded-lg font-medium bg-white"
@@ -28,7 +28,7 @@ const HomeGetStartedCard: React.FC = () => {
       </div>
       <div
         className="absolute"
-        style={{ top: 'calc(50% - 276px)', left: 'calc(50% - 220px)' }}
+        style={{ top: 'calc(50% - 236px)', left: 'calc(50% - 180px)', width: '260px', height: '260px' }}
       >
         <MoneyAnimation /> {/* Include the MoneyAnimation component */}
       </div>
