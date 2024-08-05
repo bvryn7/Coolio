@@ -1,20 +1,27 @@
 // src/components/BottomTable.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Table, Button, Text } from '@mantine/core';
 import { IconTrash } from '@tabler/icons-react';
+import { CMU_CLASSES } from './Cmuholder'; // Ensure this path is correct
+import { useUser } from '../UserContext'; // Ensure this path is correct
 
 const BottomTable: React.FC = () => {
   const [rows, setRows] = useState<any[]>([]);
   const [totalCredits, setTotalCredits] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
+  const { user } = useUser();
+  const [classes, setClasses] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (user?.university === 'Central Michigan University') {
+      setClasses(CMU_CLASSES);
+    } else {
+      setClasses([]); // Or set other university classes here
+    }
+  }, [user]);
 
   const handleAddRow = () => {
-    if (totalCredits + 3 > 18) {
-      setError('Cannot add more than 18 credits.');
-      return;
-    }
-    setRows([...rows, { id: Date.now(), credits: 3 }]);
-    setTotalCredits(totalCredits + 3);
+    setRows([...rows, { id: Date.now(), courseId: '', genEdRequirement: '', credits: 0, online: false }]);
     setError(null);
   };
 
@@ -25,21 +32,25 @@ const BottomTable: React.FC = () => {
     setError(null);
   };
 
-  const handleCreditsChange = (id: number, credits: number) => {
-    const newRowState = rows.map(row => {
-      if (row.id === id) {
-        const difference = credits - row.credits;
-        if (totalCredits + difference > 18) {
-          setError('Cannot exceed 18 credits.');
-          return row;
+  const handleCourseChange = (id: number, courseId: string) => {
+    const selectedCourse = classes.find(course => course.id === courseId);
+    if (selectedCourse) {
+      const newRowState = rows.map(row => {
+        if (row.id === id) {
+          return {
+            ...row,
+            courseId: selectedCourse.courseId,
+            genEdRequirement: selectedCourse.genEdRequirement,
+            credits: selectedCourse.credits,
+            online: selectedCourse.online,
+          };
         }
-        setTotalCredits(totalCredits + difference);
-        return { ...row, credits };
-      }
-      return row;
-    });
-    setRows(newRowState);
-    setError(null);
+        return row;
+      });
+      setRows(newRowState);
+      setTotalCredits(newRowState.reduce((sum, row) => sum + row.credits, 0));
+      setError(null);
+    }
   };
 
   return (
@@ -71,7 +82,7 @@ const BottomTable: React.FC = () => {
         <thead style={{ backgroundColor: '#e0f7fa', borderBottom: '2px solid #ccc' }}>
           <tr>
             <th style={{ textAlign: 'left', padding: '24px', borderRight: '1px solid transparent', fontWeight: 'bold' }}>
-              Original Course (Western Michigan University)
+              Original Course (Central Michigan University)
             </th>
             <th style={{ textAlign: 'center', padding: '24px', borderRight: '1px solid transparent', fontWeight: 'bold' }}>
               Gen Ed Requirement
@@ -92,35 +103,35 @@ const BottomTable: React.FC = () => {
             <tr key={row.id} style={{ borderBottom: '1px solid transparent' }}>
               <td style={{ textAlign: 'left', padding: '24px', borderRight: '1px solid transparent' }}>
                 <select
-                  style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
+                  style={{ width: '100%', padding: '8px', border: 'none', background: 'transparent', outline: 'none' }}
+                  value={row.courseId}
+                  onChange={(e) => handleCourseChange(row.id, e.target.value)}
                 >
-                  <option value="" disabled selected>Select Course</option>
-                  <option value="course1">Course 1</option>
-                  <option value="course2">Course 2</option>
-                  <option value="course3">Course 3</option>
-                </select>
-              </td>
-              <td style={{ textAlign: 'center', padding: '24px', borderRight: '1px solid transparent' }}>
-                <select
-                  style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
-                >
-                  <option value="" disabled selected>Select Requirement</option>
-                  <option value="requirement1">Requirement 1</option>
-                  <option value="requirement2">Requirement 2</option>
-                  <option value="requirement3">Requirement 3</option>
+                  <option value="" disabled>Select Course</option>
+                  {classes.map((course) => (
+                    <option key={course.id} value={course.id}>{course.name}</option>
+                  ))}
                 </select>
               </td>
               <td style={{ textAlign: 'center', padding: '24px', borderRight: '1px solid transparent' }}>
                 <input
-                  type="number"
-                  min="1"
-                  max="18"
-                  value={row.credits}
-                  onChange={(e) => handleCreditsChange(row.id, parseInt(e.target.value))}
-                  style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
+                  type="text"
+                  value={row.genEdRequirement}
+                  readOnly
+                  style={{ width: '100%', padding: '8px', border: 'none', background: 'transparent', outline: 'none' }}
                 />
               </td>
-              <td style={{ textAlign: 'center', padding: '24px', borderRight: '1px solid transparent' }}>Yes</td>
+              <td style={{ textAlign: 'center', padding: '24px', borderRight: '1px solid transparent' }}>
+                <input
+                  type="text"
+                  value={row.credits}
+                  readOnly
+                  style={{ width: '100%', padding: '8px', border: 'none', background: 'transparent', outline: 'none' }}
+                />
+              </td>
+              <td style={{ textAlign: 'center', padding: '24px', borderRight: '1px solid transparent' }}>
+                {row.online ? 'Yes' : 'No'}
+              </td>
               <td style={{ textAlign: 'center', padding: '24px' }}>
                 <Button variant="subtle" color="red" size="xs" onClick={() => handleRemoveRow(row.id)}>
                   <IconTrash size={16} />
