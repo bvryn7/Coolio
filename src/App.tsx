@@ -91,6 +91,8 @@ const Main: React.FC<MainProps> = ({ isAuthenticated, onAuthChange }) => {
             <Route path="/student-profile-page" element={isAuthenticated ? <StudentProfilePage /> : <Navigate to="/auth" />} />
             <Route path="/gvsu-overview" element={<GVSUOverview />} />
             <Route path="/cmu-overview" element={<CMUOverview />} />
+            <Route path="/central-michigan" element={<CMUOverview />} /> {/* Add route for CMU */}
+            <Route path="/grand-valley-state" element={<GVSUOverview />} /> {/* Add route for GVSU */}
           </Routes>
         </div>
       </main>

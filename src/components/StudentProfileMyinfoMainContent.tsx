@@ -1,3 +1,4 @@
+// src/components/StudentProfileMyinfoMainContent.tsx
 import React, { useState, useRef, useEffect, RefObject } from 'react';
 import { Box, Button } from '@mantine/core';
 import Select, { SingleValue } from 'react-select';
@@ -9,8 +10,8 @@ import UniversityIcon from '@mui/icons-material/Apartment';
 import StateIcon from '@mui/icons-material/LocationCity';
 import ConfettiAnimation from './ConfettiAnimation';
 import '../styles.css';
-import axios from 'axios';
-import { getUniversities, getStates, University, State } from '../services/universityService';
+import { states } from '../constants/states'; // Import hardcoded states
+import { universities } from '../constants/universities'; // Import hardcoded universities
 import {
   buttonStyle,
   selectedButtonStyle,
@@ -20,6 +21,7 @@ import {
   subHeadingStyle,
   questionHeadingStyle,
 } from './StudentProfileMyinfoMainContentStyles';
+import { saveToLocalStorage, getFromLocalStorage } from '../utils/localStorageUtil'; // Import utility functions
 
 const normalizeStateOrGrade = (value: string | null): string | undefined => value ?? undefined;
 
@@ -41,44 +43,11 @@ const StudentProfileMyinfoMainContent: React.FC = () => {
   const [selectedUniversity, setSelectedUniversity] = useState<SelectOption | null>(null);
   const [confettiVisible, setConfettiVisible] = useState(false);
   const [scrollTo, setScrollTo] = useState<RefObject<HTMLDivElement> | null>(null);
-  const [universities, setUniversities] = useState<SelectOption[]>([]);
-  const [states, setStates] = useState<SelectOption[]>([]);
 
   const stateQuestionRef = useRef<HTMLDivElement>(null);
   const secondQuestionRef = useRef<HTMLDivElement>(null);
   const thirdQuestionRef = useRef<HTMLDivElement>(null);
   const eligibilityMessageRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const fetchUniversities = async () => {
-      try {
-        const data = await getUniversities();
-        const options = data.map((university: University) => ({
-          value: university.id.toString(),
-          label: university.name,
-        }));
-        setUniversities(options);
-      } catch (error) {
-        console.error('Failed to fetch universities', error);
-      }
-    };
-
-    const fetchStates = async () => {
-      try {
-        const data = await getStates();
-        const options = data.map((state: State) => ({
-          value: state.id.toString(),
-          label: state.name,
-        }));
-        setStates(options);
-      } catch (error) {
-        console.error('Failed to fetch states', error);
-      }
-    };
-
-    fetchUniversities();
-    fetchStates();
-  }, []);
 
   const handleButtonClick = (button: string) => {
     setSelectedButton(button);
@@ -86,31 +55,18 @@ const StudentProfileMyinfoMainContent: React.FC = () => {
     setScrollTo(stateQuestionRef);
   };
 
-  const handleStateChange = async (newValue: SingleValue<SelectOption>) => {
+  const handleStateChange = (newValue: SingleValue<SelectOption>) => {
     setSelectedState(newValue ?? null);
     setShowSecondQuestion(true);
     setScrollTo(secondQuestionRef);
 
-    const newState = newValue?.value ?? undefined;
-    if (newState && user && user.id) {
-      try {
-        const updatedStudentInfo = {
-          homestate: newState, // Ensure it's a string
-          name: user.name,
-          email: user.email,
-        };
+    if (user && user.id && newValue) {
+      const newState = newValue.value;
 
-        const response = await axios.patch(
-          `http://localhost:8000/api/students/${user.id}/`,
-          updatedStudentInfo
-        );
+      // Save selected state to local storage
+      saveToLocalStorage('selectedState', newState);
 
-        setUser({ ...user, homestate: newState });
-      } catch (error: any) {
-        console.error('Failed to save state:', error.response ? error.response.data : error.message);
-      }
-    } else {
-      console.error('User or user.id is undefined', user);
+      setUser({ ...user, homestate: newState });
     }
   };
 
@@ -121,62 +77,39 @@ const StudentProfileMyinfoMainContent: React.FC = () => {
     setScrollTo(thirdQuestionRef);
   };
 
-  const handleUniversityChange = async (newValue: SingleValue<SelectOption>) => {
+  const handleUniversityChange = (newValue: SingleValue<SelectOption>) => {
     setSelectedUniversity(newValue);
     if (newValue && user && user.id) {
       setShowEligibilityMessage(true);
       setConfettiVisible(true);
       setScrollTo(eligibilityMessageRef);
 
-      try {
-        const updatedStudent = {
-          university: newValue.value,
-          name: user.name,
-          email: user.email,
-        };
+      // Save selected university to local storage
+      saveToLocalStorage('selectedUniversity', newValue.value);
 
-        const responseStudent = await axios.patch(
-          `http://localhost:8000/api/students/${user.id}/`,
-          updatedStudent
-        );
+      setUser({ ...user, university: newValue.value });
 
-        setUser({ ...user, university: newValue.value });
-      } catch (error: any) {
-        console.error('Failed to save university:', error.response ? error.response.data : error.message);
+      // Navigate to the appropriate page based on selected university
+      if (newValue.value === 'Central Michigan University') {
+        navigate('/central-michigan');
+      } else if (newValue.value === 'Grand Valley State University') {
+        navigate('/grand-valley-state');
       }
-    } else {
-      console.error('User or user.id is undefined', user);
     }
   };
 
   useEffect(() => {
-    const saveProfile = async () => {
-      if (!user) return;
+    const savedState = getFromLocalStorage('selectedState');
+    const savedUniversity = getFromLocalStorage('selectedUniversity');
 
-      const profileData: User = {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        university: selectedUniversity?.value,
-        homestate: selectedState ? selectedState.value : undefined, // Ensure it's a string
-        grade: normalizeStateOrGrade(selectedGrade) ?? undefined,
-      };
-
-      try {
-        const response = await axios.patch(
-          `http://localhost:8000/api/students/${user.id}/`,
-          profileData
-        );
-        setUser(response.data);
-      } catch (error: any) {
-        console.error('Failed to save profile:', error);
-      }
-    };
-
-    if (selectedUniversity || selectedState || selectedGrade) {
-      saveProfile();
+    if (savedState) {
+      setSelectedState(states.find(state => state.value === savedState) ?? null);
     }
-  }, [selectedUniversity, selectedState, selectedGrade, user, setUser]);
+
+    if (savedUniversity) {
+      setSelectedUniversity(universities.find(university => university.value === savedUniversity) ?? null);
+    }
+  }, []);
 
   return (
     <Box className={containerStyle}>
@@ -229,6 +162,7 @@ const StudentProfileMyinfoMainContent: React.FC = () => {
               onChange={handleStateChange}
               placeholder="Enter your state"
               styles={selectStyles}
+              value={selectedState}
             />
           </div>
         </div>
@@ -305,6 +239,7 @@ const StudentProfileMyinfoMainContent: React.FC = () => {
               onChange={handleUniversityChange}
               placeholder="Enter your university"
               styles={selectStyles}
+              value={selectedUniversity}
             />
           </div>
         </div>
