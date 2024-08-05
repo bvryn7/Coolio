@@ -10,7 +10,7 @@ import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import SimpleWhiteHeader from './SimpleWhiteHeader';
 import ProgressBar from './ProgressBar';
 import NextPrev from './NextPrev';
-import { useUser } from './UserContext'; // Import the context
+import { useUser } from './CalculatorPage/UserContext'; // Import the context
 
 const StudentOverview: React.FC = () => {
   const isMediumScreen = useMediaQuery({ query: '(min-width: 768px)' });

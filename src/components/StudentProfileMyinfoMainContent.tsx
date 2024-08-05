@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect, RefObject } from 'react';
 import { Box, Button } from '@mantine/core';
 import Select, { SingleValue } from 'react-select';
 import { useNavigate } from 'react-router-dom';
-import { useUser, User } from './UserContext';
+import { useUser, User } from './CalculatorPage/UserContext';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import SchoolIcon from '@mui/icons-material/School';
 import UniversityIcon from '@mui/icons-material/Apartment';
@@ -11,7 +11,7 @@ import StateIcon from '@mui/icons-material/LocationCity';
 import ConfettiAnimation from './ConfettiAnimation';
 import '../styles.css';
 import { states } from '../constants/states'; // Import hardcoded states
-import { universities } from '../constants/universities'; // Import hardcoded universities
+import { universities } from './CalculatorPage/universities'; // Import hardcoded universities
 import {
   buttonStyle,
   selectedButtonStyle,

@@ -1,9 +1,8 @@
-// src/components/BottomTable.tsx
 import React, { useState, useEffect } from 'react';
 import { Box, Table, Button, Text } from '@mantine/core';
 import { IconTrash } from '@tabler/icons-react';
-import { CMU_CLASSES } from './Cmuholder'; // Ensure this path is correct
-import { useUser } from '../UserContext'; // Ensure this path is correct
+import { useUser } from './UserContext'; // Ensure this path is correct
+import { UNIVERSITY_CLASSES } from '../../constants/universityClasses';
 
 const BottomTable: React.FC = () => {
   const [rows, setRows] = useState<any[]>([]);
@@ -13,10 +12,10 @@ const BottomTable: React.FC = () => {
   const [classes, setClasses] = useState<any[]>([]);
 
   useEffect(() => {
-    if (user?.university === 'Central Michigan University') {
-      setClasses(CMU_CLASSES);
+    if (user?.university) {
+      setClasses(UNIVERSITY_CLASSES[user.university] || []);
     } else {
-      setClasses([]); // Or set other university classes here
+      setClasses([]);
     }
   }, [user]);
 
@@ -126,7 +125,7 @@ const BottomTable: React.FC = () => {
                   type="text"
                   value={row.credits}
                   readOnly
-                  style={{ width: '100%', padding: '8px', border: 'none', background: 'transparent', outline: 'none' }}
+                  style={{ width: '100%', padding: '8px', border: 'none', background: 'transparent', outline: 'none', textAlign: 'center' }}
                 />
               </td>
               <td style={{ textAlign: 'center', padding: '24px', borderRight: '1px solid transparent' }}>

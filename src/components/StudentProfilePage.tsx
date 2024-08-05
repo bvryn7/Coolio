@@ -5,7 +5,7 @@ import SimpleWhiteHeader from './SimpleWhiteHeader';
 import Sidebar from './SideBar';
 import BackButton from './BackButton';
 import { useNavigate } from 'react-router-dom';
-import { useUser } from './UserContext';
+import { useUser } from './CalculatorPage/UserContext';
 import { getUniversities, getStates, saveProfile } from '../services/apiServices';
 
 const StudentProfilePage: React.FC = () => {

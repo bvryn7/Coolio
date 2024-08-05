@@ -1,7 +1,7 @@
 
 // src/services/mockApiServices.ts
 
-import { User } from '../components/UserContext';
+import { User } from '../components/CalculatorPage/UserContext';
 
 export const saveProfile = async (profileData: User): Promise<User> => {
   return new Promise((resolve) => {

@@ -1,7 +1,7 @@
 // src/App.tsx
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from 'react-router-dom';
-import { UserProvider } from './components/UserContext';
+import { UserProvider } from './components/CalculatorPage/UserContext';
 import PriceComparison from './components/CalculatorPage/PriceComparison';
 import AdditionalComponent from './components/CalculatorPage/AdditionalComponent';
 import CommunityCollegeList from './components/CalculatorPage/CommunityCollegeList';

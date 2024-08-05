@@ -1,6 +1,6 @@
 import React, { useState, useEffect, CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useUser } from './UserContext'; // Import the useUser hook for setting user
+import { useUser } from './CalculatorPage/UserContext'; // Import the useUser hook for setting user
 import { signUp, login } from '../utils/authService';
 
 interface AuthPageProps {

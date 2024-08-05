@@ -5,7 +5,7 @@ import SimpleWhiteHeader from './SimpleWhiteHeader';
 import Sidebar from './SideBar'; // Ensure the correct path
 import BackButton from './BackButton'; // Import BackButton component
 import { useNavigate } from 'react-router-dom';
-import { useUser } from './UserContext'; // Import UserContext
+import { useUser } from './CalculatorPage/UserContext'; // Import UserContext
 
 const ProfileSignIn: React.FC = () => {
   const isMediumScreen = useMediaQuery({ query: '(min-width: 768px)' });
