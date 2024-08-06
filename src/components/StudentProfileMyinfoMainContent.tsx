@@ -1,4 +1,3 @@
-// src/components/StudentProfileMyinfoMainContent.tsx
 import React, { useState, useRef, useEffect, RefObject } from 'react';
 import { Box, Button } from '@mantine/core';
 import Select, { SingleValue } from 'react-select';
@@ -10,18 +9,11 @@ import UniversityIcon from '@mui/icons-material/Apartment';
 import StateIcon from '@mui/icons-material/LocationCity';
 import ConfettiAnimation from './ConfettiAnimation';
 import '../styles.css';
-import { states } from '../constants/states'; // Import hardcoded states
-import { universities } from './CalculatorPage/universities'; // Import hardcoded universities
-import {
-  buttonStyle,
-  selectedButtonStyle,
-  selectStyles,
-  containerStyle,
-  headingStyle,
-  subHeadingStyle,
-  questionHeadingStyle,
-} from './StudentProfileMyinfoMainContentStyles';
-import { saveToLocalStorage, getFromLocalStorage } from '../utils/localStorageUtil'; // Import utility functions
+import { states } from '../constants/states';
+import { universities } from './CalculatorPage/universities';
+import { buttonStyle, selectedButtonStyle, selectStyles, containerStyle, headingStyle, subHeadingStyle, questionHeadingStyle } from './StudentProfileMyinfoMainContentStyles';
+import { saveToLocalStorage, getFromLocalStorage } from '../utils/localStorageUtil';
+import { UNIVERSITY_CLASSES } from 'C:/Users/benja/CourseSwap3/src/constants/universityClasses';
 
 const normalizeStateOrGrade = (value: string | null): string | undefined => value ?? undefined;
 
@@ -62,10 +54,7 @@ const StudentProfileMyinfoMainContent: React.FC = () => {
 
     if (user && user.id && newValue) {
       const newState = newValue.value;
-
-      // Save selected state to local storage
       saveToLocalStorage('selectedState', newState);
-
       setUser({ ...user, homestate: newState });
     }
   };
@@ -86,8 +75,11 @@ const StudentProfileMyinfoMainContent: React.FC = () => {
 
       // Save selected university to local storage
       saveToLocalStorage('selectedUniversity', newValue.value);
-
       setUser({ ...user, university: newValue.value });
+
+      // Save university classes to local storage
+      const universityClasses = UNIVERSITY_CLASSES[newValue.value];
+      saveToLocalStorage('universityClasses', { [newValue.value]: universityClasses });
 
       // Navigate to the appropriate page based on selected university
       if (newValue.value === 'Central Michigan University') {

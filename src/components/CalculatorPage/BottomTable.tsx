@@ -2,25 +2,36 @@ import React, { useState, useEffect } from 'react';
 import { Box, Table, Button, Text } from '@mantine/core';
 import { IconTrash } from '@tabler/icons-react';
 import { useUser } from './UserContext'; // Ensure this path is correct
-import { UNIVERSITY_CLASSES } from '../../constants/universityClasses'; // Ensure this path is correct
+import { UNIVERSITY_CLASSES } from 'C:/Users/benja/CourseSwap3/src/constants/universityClasses'; // Ensure this path is correct
 
 interface Course {
-  id: string;
-  courseId: string;
-  name: string;
-  equivalentCourseId: string;
-  equivalent: string;
-  credits: number;
-  online: boolean;
-  genEdRequirement: string;
+  universityName: string;
   associatedCollege: string;
+  genEdRequirement: string;
+  universityCredits: number;
+  collegeCredits: number;
+  online: boolean;
+  universityCourse: string;
+  collegeCourse: string;
+  universityId: string;
+  collegeId: string;
+  isOneCredit: boolean;
+  collegePriceInDistrict: number;
+  collegePriceInState: number;
+  collegePriceOutState: number;
+  universityCostInState: number;
+  universityCostOutOfState: number;
+  universityCostInternational: number;
+  universityFullCostInState: number;
+  universityFullCostOutState: number;
+  universityFullCostInternational: number;
 }
 
 interface Row {
   id: number;
-  courseId: string;
+  collegeId: string;
   genEdRequirement: string;
-  credits: number;
+  collegeCredits: number;
   online: boolean;
 }
 
@@ -35,7 +46,9 @@ const BottomTable: React.FC = () => {
   useEffect(() => {
     if (user?.university) {
       const universityClasses = UNIVERSITY_CLASSES[user.university] || [];
-      const communityCollegeClasses = universityClasses.filter(course => course.associatedCollege === 'Grand Rapids Community College');
+      const communityCollegeClasses = universityClasses.filter(
+        (course) => course.associatedCollege === 'Grand Rapids Community College'
+      );
       setClasses(communityCollegeClasses);
     } else {
       setClasses([]);
@@ -43,7 +56,7 @@ const BottomTable: React.FC = () => {
   }, [user]);
 
   useEffect(() => {
-    const total = rows.reduce((sum, row) => sum + row.credits, 0);
+    const total = rows.reduce((sum, row) => sum + row.collegeCredits, 0);
     setTotalCredits(total);
     if (total > creditLimit) {
       setError(`Cannot add more than ${creditLimit} credits.`);
@@ -57,26 +70,26 @@ const BottomTable: React.FC = () => {
       setError(`Cannot add more than ${creditLimit} credits.`);
       return;
     }
-    setRows([...rows, { id: Date.now(), courseId: '', genEdRequirement: '', credits: 0, online: false }]);
+    setRows([...rows, { id: Date.now(), collegeId: '', genEdRequirement: '', collegeCredits: 0, online: false }]);
   };
 
   const handleRemoveRow = (id: number) => {
-    const rowToRemove = rows.find(row => row.id === id);
+    const rowToRemove = rows.find((row) => row.id === id);
     if (rowToRemove) {
-      setRows(rows.filter(row => row.id !== id));
+      setRows(rows.filter((row) => row.id !== id));
     }
   };
 
-  const handleCourseChange = (id: number, equivalent: string) => {
-    const selectedCourse = classes.find(course => course.equivalent === equivalent);
+  const handleCourseChange = (id: number, collegeId: string) => {
+    const selectedCourse = classes.find((course) => course.collegeId === collegeId);
     if (selectedCourse) {
-      const newRowState = rows.map(row => {
+      const newRowState = rows.map((row) => {
         if (row.id === id) {
           return {
             ...row,
-            courseId: selectedCourse.equivalentCourseId,
+            collegeId: selectedCourse.collegeId,
             genEdRequirement: selectedCourse.genEdRequirement,
-            credits: selectedCourse.credits,
+            collegeCredits: selectedCourse.collegeCredits,
             online: selectedCourse.online,
           };
         }
@@ -137,12 +150,16 @@ const BottomTable: React.FC = () => {
               <td style={{ textAlign: 'left', padding: '24px', borderRight: '1px solid transparent' }}>
                 <select
                   style={{ width: '100%', padding: '8px', border: 'none', background: 'transparent', outline: 'none' }}
-                  value={row.courseId}
+                  value={row.collegeId}
                   onChange={(e) => handleCourseChange(row.id, e.target.value)}
                 >
-                  <option value="" disabled>Select Course</option>
+                  <option value="" disabled>
+                    Select Course
+                  </option>
                   {classes.map((course) => (
-                    <option key={course.id} value={course.equivalent}>{course.equivalent}</option>
+                    <option key={course.collegeId} value={course.collegeId}>
+                      {course.collegeCourse} ({course.collegeId})
+                    </option>
                   ))}
                 </select>
               </td>
@@ -157,7 +174,7 @@ const BottomTable: React.FC = () => {
               <td style={{ textAlign: 'center', padding: '24px', borderRight: '1px solid transparent' }}>
                 <input
                   type="text"
-                  value={row.credits}
+                  value={row.collegeCredits}
                   readOnly
                   style={{ width: '100%', padding: '8px', border: 'none', background: 'transparent', outline: 'none', textAlign: 'center' }}
                 />
