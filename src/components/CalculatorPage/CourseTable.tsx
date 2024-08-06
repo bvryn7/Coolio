@@ -106,7 +106,7 @@ const CourseTable: React.FC = () => {
         paddingBottom: '1rem',
         backgroundColor: totalCredits > creditLimit ? 'lightgray' : 'transparent', // Set background to light gray if limit exceeded
         transition: 'transform 0.2s ease-in-out',
-        height: '750px', // Set height to 750 pixels
+        height: '200px', // Adjusted height to fit exactly one row
       }}
       className="hover-effect"
     >

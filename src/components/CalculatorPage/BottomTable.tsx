@@ -43,12 +43,13 @@ const BottomTable: React.FC = () => {
   const [classes, setClasses] = useState<Course[]>([]);
   const [associatedCollege, setAssociatedCollege] = useState<string>('Loading...');
   const creditLimit = 17;
+  const classLimit = 6; // Limit to six classes
 
   useEffect(() => {
     if (user?.university) {
       const universityClasses = UNIVERSITY_CLASSES[user.university] || [];
       const communityCollegeClasses = universityClasses.filter(
-        (course) => course.associatedCollege === 'Grand Rapids Community College'
+        (course) => course.associatedCollege === 'Grand Rapids Community College' && !course.isOneCredit
       );
       setClasses(communityCollegeClasses);
       if (communityCollegeClasses.length > 0) {
@@ -70,6 +71,10 @@ const BottomTable: React.FC = () => {
   }, [rows]);
 
   const handleAddRow = () => {
+    if (rows.length >= classLimit) {
+      setError(`Cannot add more than ${classLimit} classes.`);
+      return;
+    }
     if (totalCredits >= creditLimit) {
       setError(`Cannot add more than ${creditLimit} credits.`);
       return;
@@ -112,14 +117,14 @@ const BottomTable: React.FC = () => {
         border: '3px solid #ccc', // Thicker gray border
         marginTop: '2rem',
         paddingBottom: '1rem',
-        backgroundColor: totalCredits >= creditLimit ? 'lightgray' : 'transparent', // Set background to light gray if limit reached
+        backgroundColor: totalCredits >= creditLimit || rows.length >= classLimit ? 'lightgray' : 'transparent', // Set background to light gray if limit reached
         transition: 'transform 0.2s ease-in-out',
-        height: '750px', // Set height to 750 pixels
+        height: '600px', // Adjusted height to fit exactly six rows
       }}
       className="hover-effect"
     >
       <Box style={{ textAlign: 'left', marginTop: '1rem', marginLeft: '1rem' }}>
-        <Button variant="light" color="green" onClick={handleAddRow} disabled={totalCredits >= creditLimit}>
+        <Button variant="light" color="green" onClick={handleAddRow} disabled={totalCredits >= creditLimit || rows.length >= classLimit}>
           + Add New Class
         </Button>
         {error && (
