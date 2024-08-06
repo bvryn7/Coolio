@@ -1,11 +1,10 @@
-// src/components/TransferMaxCombinedSchedule.tsx
+
 import React from 'react';
 import CardComponent from './CardComponent';
 
 const TransferMaxCombinedSchedule: React.FC = () => {
   return (
-    <div>
-      {/* Blue component */}
+    <div style={{ width: '100%' }}>
       <div className="bg-blue-100 p-4 flex justify-between items-center">
         <div>
           <p className="font-bold">Old Total Price</p>
@@ -21,8 +20,6 @@ const TransferMaxCombinedSchedule: React.FC = () => {
           <p>$0.00</p>
         </div>
       </div>
-
-      {/* CardComponent */}
       <CardComponent>
         <h2 className="text-xl font-bold mt-4">TransferMax Combined Schedule</h2>
         <p>
