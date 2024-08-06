@@ -2,43 +2,79 @@ import React, { useState, useEffect } from 'react';
 import { Box, Table, Button, Text } from '@mantine/core';
 import { IconTrash } from '@tabler/icons-react';
 import { useUser } from './UserContext'; // Ensure this path is correct
-import { UNIVERSITY_CLASSES } from '../../constants/universityClasses';
+import { UNIVERSITY_CLASSES } from '../../constants/universityClasses'; // Ensure this path is correct
+
+interface Course {
+  id: string;
+  courseId: string;
+  name: string;
+  equivalentCourseId: string;
+  equivalent: string;
+  credits: number;
+  online: boolean;
+  genEdRequirement: string;
+  associatedCollege: string;
+}
+
+interface Row {
+  id: number;
+  courseId: string;
+  genEdRequirement: string;
+  credits: number;
+  online: boolean;
+}
 
 const BottomTable: React.FC = () => {
-  const [rows, setRows] = useState<any[]>([]);
+  const [rows, setRows] = useState<Row[]>([]);
   const [totalCredits, setTotalCredits] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
   const { user } = useUser();
-  const [classes, setClasses] = useState<any[]>([]);
+  const [classes, setClasses] = useState<Course[]>([]);
+  const creditLimit = 17;
 
   useEffect(() => {
     if (user?.university) {
-      setClasses(UNIVERSITY_CLASSES[user.university] || []);
+      const universityClasses = UNIVERSITY_CLASSES[user.university] || [];
+      const communityCollegeClasses = universityClasses.filter(course => course.associatedCollege === 'Grand Rapids Community College');
+      setClasses(communityCollegeClasses);
     } else {
       setClasses([]);
     }
   }, [user]);
 
+  useEffect(() => {
+    const total = rows.reduce((sum, row) => sum + row.credits, 0);
+    setTotalCredits(total);
+    if (total > creditLimit) {
+      setError(`Cannot add more than ${creditLimit} credits.`);
+    } else {
+      setError(null);
+    }
+  }, [rows]);
+
   const handleAddRow = () => {
+    if (totalCredits >= creditLimit) {
+      setError(`Cannot add more than ${creditLimit} credits.`);
+      return;
+    }
     setRows([...rows, { id: Date.now(), courseId: '', genEdRequirement: '', credits: 0, online: false }]);
-    setError(null);
   };
 
   const handleRemoveRow = (id: number) => {
     const rowToRemove = rows.find(row => row.id === id);
-    setRows(rows.filter(row => row.id !== id));
-    setTotalCredits(totalCredits - rowToRemove.credits);
-    setError(null);
+    if (rowToRemove) {
+      setRows(rows.filter(row => row.id !== id));
+    }
   };
 
-  const handleCourseChange = (id: number, courseId: string) => {
-    const selectedCourse = classes.find(course => course.id === courseId);
+  const handleCourseChange = (id: number, equivalent: string) => {
+    const selectedCourse = classes.find(course => course.equivalent === equivalent);
     if (selectedCourse) {
       const newRowState = rows.map(row => {
         if (row.id === id) {
           return {
             ...row,
-            courseId: selectedCourse.courseId,
+            courseId: selectedCourse.equivalentCourseId,
             genEdRequirement: selectedCourse.genEdRequirement,
             credits: selectedCourse.credits,
             online: selectedCourse.online,
@@ -47,8 +83,6 @@ const BottomTable: React.FC = () => {
         return row;
       });
       setRows(newRowState);
-      setTotalCredits(newRowState.reduce((sum, row) => sum + row.credits, 0));
-      setError(null);
     }
   };
 
@@ -61,14 +95,14 @@ const BottomTable: React.FC = () => {
         border: '3px solid #ccc', // Thicker gray border
         marginTop: '2rem',
         paddingBottom: '1rem',
-        backgroundColor: 'transparent', // Set background to transparent
+        backgroundColor: totalCredits >= creditLimit ? 'lightgray' : 'transparent', // Set background to light gray if limit reached
         transition: 'transform 0.2s ease-in-out',
         height: '750px', // Set height to 750 pixels
       }}
       className="hover-effect"
     >
       <Box style={{ textAlign: 'left', marginTop: '1rem', marginLeft: '1rem' }}>
-        <Button variant="light" color="green" onClick={handleAddRow}>
+        <Button variant="light" color="green" onClick={handleAddRow} disabled={totalCredits >= creditLimit}>
           + Add New Class
         </Button>
         {error && (
@@ -81,7 +115,7 @@ const BottomTable: React.FC = () => {
         <thead style={{ backgroundColor: '#e0f7fa', borderBottom: '2px solid #ccc' }}>
           <tr>
             <th style={{ textAlign: 'left', padding: '24px', borderRight: '1px solid transparent', fontWeight: 'bold' }}>
-              Original Course (Central Michigan University)
+              New Course (Grand Rapids Community College)
             </th>
             <th style={{ textAlign: 'center', padding: '24px', borderRight: '1px solid transparent', fontWeight: 'bold' }}>
               Gen Ed Requirement
@@ -108,7 +142,7 @@ const BottomTable: React.FC = () => {
                 >
                   <option value="" disabled>Select Course</option>
                   {classes.map((course) => (
-                    <option key={course.id} value={course.id}>{course.name}</option>
+                    <option key={course.id} value={course.equivalent}>{course.equivalent}</option>
                   ))}
                 </select>
               </td>
