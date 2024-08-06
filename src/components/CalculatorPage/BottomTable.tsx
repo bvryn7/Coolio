@@ -41,6 +41,7 @@ const BottomTable: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const { user } = useUser();
   const [classes, setClasses] = useState<Course[]>([]);
+  const [associatedCollege, setAssociatedCollege] = useState<string>('Loading...');
   const creditLimit = 17;
 
   useEffect(() => {
@@ -50,6 +51,9 @@ const BottomTable: React.FC = () => {
         (course) => course.associatedCollege === 'Grand Rapids Community College'
       );
       setClasses(communityCollegeClasses);
+      if (communityCollegeClasses.length > 0) {
+        setAssociatedCollege(communityCollegeClasses[0].associatedCollege);
+      }
     } else {
       setClasses([]);
     }
@@ -128,7 +132,7 @@ const BottomTable: React.FC = () => {
         <thead style={{ backgroundColor: '#e0f7fa', borderBottom: '2px solid #ccc' }}>
           <tr>
             <th style={{ textAlign: 'left', padding: '24px', borderRight: '1px solid transparent', fontWeight: 'bold' }}>
-              New Course (Grand Rapids Community College)
+              {associatedCollege}
             </th>
             <th style={{ textAlign: 'center', padding: '24px', borderRight: '1px solid transparent', fontWeight: 'bold' }}>
               Gen Ed Requirement

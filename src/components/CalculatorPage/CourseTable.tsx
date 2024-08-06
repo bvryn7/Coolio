@@ -40,12 +40,13 @@ const CourseTable: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const { user } = useUser();
   const [classes, setClasses] = useState<Course[]>([]);
-  const creditLimit = 17;
+  const creditLimit = 1; // Limit to only one credit
 
   useEffect(() => {
     if (user?.university) {
       const universityClasses = UNIVERSITY_CLASSES[user.university] || [];
-      setClasses(universityClasses);
+      const oneCreditClasses = universityClasses.filter(course => course.isOneCredit);
+      setClasses(oneCreditClasses);
     } else {
       setClasses([]);
     }
@@ -55,7 +56,7 @@ const CourseTable: React.FC = () => {
     const total = rows.reduce((sum, row) => sum + row.universityCredits, 0);
     setTotalCredits(total);
     if (total > creditLimit) {
-      setError(`Cannot add more than ${creditLimit} credits.`);
+      setError(`Only one credit from your home institution is allowed.`);
     } else {
       setError(null);
     }
@@ -63,7 +64,7 @@ const CourseTable: React.FC = () => {
 
   const handleAddRow = () => {
     if (totalCredits >= creditLimit) {
-      setError(`Cannot add more than ${creditLimit} credits.`);
+      setError(`Only one credit from your home institution is allowed.`);
       return;
     }
     setRows([...rows, { id: Date.now(), universityId: '', universityCredits: 0, online: false }]);
@@ -103,14 +104,14 @@ const CourseTable: React.FC = () => {
         border: '3px solid #ccc', // Thicker gray border
         marginTop: '2rem',
         paddingBottom: '1rem',
-        backgroundColor: totalCredits >= creditLimit ? 'lightgray' : 'transparent', // Set background to light gray if limit reached
+        backgroundColor: totalCredits > creditLimit ? 'lightgray' : 'transparent', // Set background to light gray if limit exceeded
         transition: 'transform 0.2s ease-in-out',
         height: '750px', // Set height to 750 pixels
       }}
       className="hover-effect"
     >
       <Box style={{ textAlign: 'left', marginTop: '1rem', marginLeft: '1rem' }}>
-        <Button variant="light" color="green" onClick={handleAddRow} disabled={totalCredits >= creditLimit}>
+        <Button variant="light" color="green" onClick={handleAddRow}>
           + Add New Class
         </Button>
         {error && (
@@ -123,7 +124,7 @@ const CourseTable: React.FC = () => {
         <thead style={{ backgroundColor: '#e0f7fa', borderBottom: '2px solid #ccc' }}>
           <tr>
             <th style={{ textAlign: 'left', padding: '24px', borderRight: '1px solid transparent', fontWeight: 'bold' }}>
-              New Course ({user?.university || 'Loading...'})
+              {user?.university || 'Loading...'}
             </th>
             <th style={{ textAlign: 'center', padding: '24px', borderRight: '1px solid transparent', fontWeight: 'bold' }}>
               University Credits
@@ -160,7 +161,7 @@ const CourseTable: React.FC = () => {
                   type="text"
                   value={row.universityCredits}
                   readOnly
-                  style={{ width: '100%', padding: '8px', border: 'none', background: 'transparent', outline: 'none' }}
+                  style={{ width: '100%', padding: '8px', border: 'none', background: 'transparent', outline: 'none', textAlign: 'center' }}
                 />
               </td>
               <td style={{ textAlign: 'center', padding: '24px', borderRight: '1px solid transparent' }}>
