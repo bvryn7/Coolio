@@ -3,6 +3,7 @@ import { Box, Table, Button, Text } from '@mantine/core';
 import { IconTrash } from '@tabler/icons-react';
 import { useUser } from './UserContext'; // Ensure this path is correct
 import { UNIVERSITY_CLASSES } from 'C:/Users/benja/CourseSwap3/src/constants/universityClasses'; // Ensure this path is correct
+import { useClassCost } from './ClassCostContext'; // Import useClassCost
 
 interface Course {
   universityName: string;
@@ -39,6 +40,7 @@ const BottomTable: React.FC = () => {
   const [totalCredits, setTotalCredits] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
   const { user } = useUser();
+  const { setTotalClassCost } = useClassCost(); // Use setTotalClassCost from context
   const [classes, setClasses] = useState<Course[]>([]);
   const [associatedCollege, setAssociatedCollege] = useState<string>('Loading...');
   const creditLimit = 17;
@@ -67,7 +69,15 @@ const BottomTable: React.FC = () => {
     } else {
       setError(null);
     }
-  }, [rows]);
+
+    // Calculate total cost of all inputted classes
+    const totalCost = rows.reduce((sum, row) => {
+      const selectedCourse = classes.find((course) => course.collegeId === row.collegeId);
+      return sum + (selectedCourse ? getPrice(selectedCourse) * selectedCourse.collegeCredits : 0);
+    }, 0);
+
+    setTotalClassCost(totalCost);
+  }, [rows, classes, setTotalClassCost]);
 
   const handleAddRow = () => {
     if (rows.length >= classLimit) {
@@ -125,7 +135,7 @@ const BottomTable: React.FC = () => {
         paddingBottom: '1rem',
         backgroundColor: totalCredits >= creditLimit || rows.length >= classLimit ? 'lightgray' : 'transparent', // Set background to light gray if limit reached
         transition: 'transform 0.2s ease-in-out',
-        height: '600px', // Adjusted height to fit exactly six rows
+        height: '720px', // Adjusted height to fit exactly six rows
       }}
       className="hover-effect"
     >
