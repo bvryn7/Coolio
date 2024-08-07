@@ -1,15 +1,15 @@
-// ClassCostContext.tsx
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 interface ClassCostContextType {
   totalClassCost: number;
-  setTotalClassCost: React.Dispatch<React.SetStateAction<number>>;
+  setTotalClassCost: (cost: number) => void;
 }
 
 const ClassCostContext = createContext<ClassCostContextType | undefined>(undefined);
 
 export const ClassCostProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [totalClassCost, setTotalClassCost] = useState<number>(0);
+
   return (
     <ClassCostContext.Provider value={{ totalClassCost, setTotalClassCost }}>
       {children}

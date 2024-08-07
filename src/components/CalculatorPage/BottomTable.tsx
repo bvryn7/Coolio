@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Box, Table, Button, Text } from '@mantine/core';
 import { IconTrash } from '@tabler/icons-react';
 import { useUser } from './UserContext'; // Ensure this path is correct
+import { useClassCost } from './ClassCostContext'; // Ensure this path is correct
 import { UNIVERSITY_CLASSES } from 'C:/Users/benja/CourseSwap3/src/constants/universityClasses'; // Ensure this path is correct
-import { useClassCost } from './ClassCostContext'; // Import useClassCost
 
 interface Course {
   universityName: string;
@@ -214,7 +214,7 @@ const BottomTable: React.FC = () => {
                   {row.online ? 'Yes' : 'No'}
                 </td>
                 <td style={{ textAlign: 'center', padding: '24px', borderRight: '1px solid transparent' }}>
-                  ${cost.toFixed(2)}
+                  ${cost.toFixed(2).toLocaleString()}
                 </td>
                 <td style={{ textAlign: 'center', padding: '24px' }}>
                   <Button variant="subtle" color="red" size="xs" onClick={() => handleRemoveRow(row.id)}>
