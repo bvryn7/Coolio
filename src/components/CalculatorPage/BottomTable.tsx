@@ -7,6 +7,7 @@ import { UNIVERSITY_CLASSES } from 'C:/Users/benja/CourseSwap3/src/constants/uni
 interface Course {
   universityName: string;
   associatedCollege: string;
+  state: string;
   genEdRequirement: string;
   universityCredits: number;
   collegeCredits: number;
@@ -21,10 +22,8 @@ interface Course {
   collegePriceOutState: number;
   universityCostInState: number;
   universityCostOutOfState: number;
-  universityCostInternational: number;
   universityFullCostInState: number;
-  universityFullCostOutState: number;
-  universityFullCostInternational: number;
+  universityFullCostOutOfState: number;
 }
 
 interface Row {

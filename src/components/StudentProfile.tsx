@@ -1,7 +1,7 @@
-// src/components/StudentProfile.tsx
 import React, { useEffect, useState } from 'react';
 import { getFromLocalStorage } from '../utils/localStorageUtil';
 import { IStudentProfile } from '../types/IStudentProfile';
+import { useUser } from 'C:/Users/benja/CourseSwap3/src/components/CalculatorPage/UserContext';
 
 interface Course {
   universityName: string;
@@ -31,28 +31,37 @@ interface UniversityClasses {
 }
 
 const StudentProfile: React.FC = () => {
-  const [studentProfile, setStudentProfile] = useState<IStudentProfile | null>(null);
   const [universityClasses, setUniversityClasses] = useState<Course[]>([]);
+  const { user, setUser } = useUser();
 
   useEffect(() => {
     const savedProfile = getFromLocalStorage('studentProfile') as IStudentProfile;
-    setStudentProfile(savedProfile);
+    if (savedProfile) {
+      setUser({
+        id: 1, // Set a default or retrieved id here
+        name: 'Default Name', // Set a default or retrieved name here
+        email: 'default@example.com', // Set a default or retrieved email here
+        university: savedProfile.university,
+        state: savedProfile.homeState,
+        grade: 'Default Grade', // Set a default or retrieved grade here
+        homestate: savedProfile.homeState,
+      });
+    }
+
     const savedClasses = getFromLocalStorage('universityClasses') as UniversityClasses;
     if (savedProfile?.university) {
       setUniversityClasses(savedClasses[savedProfile.university] || []);
     }
-  }, []);
+  }, [setUser]);
 
-  if (!studentProfile) {
+  if (!user) {
     return <div>Loading...</div>;
   }
 
   return (
     <div>
       <h1>Student Profile</h1>
-      <p>Home State: {studentProfile.homeState}</p>
-      <p>Pricing Preferences: {studentProfile.pricingPreferences.discount}</p>
-      {/* Render other profile information */}
+      <p>Home State: {user.homestate}</p>
       <h2>Available Courses</h2>
       <ul>
         {universityClasses.map((course) => (

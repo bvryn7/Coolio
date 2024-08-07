@@ -55,7 +55,8 @@ const StudentProfileMyinfoMainContent: React.FC = () => {
     if (user && user.id && newValue) {
       const newState = newValue.value;
       saveToLocalStorage('selectedState', newState);
-      setUser({ ...user, homestate: newState });
+      setUser({ ...user, state: newState }); // Make sure the user's state is set correctly
+      console.log(`User state set to: ${newState}`);
     }
   };
 
@@ -76,6 +77,7 @@ const StudentProfileMyinfoMainContent: React.FC = () => {
       // Save selected university to local storage
       saveToLocalStorage('selectedUniversity', newValue.value);
       setUser({ ...user, university: newValue.value });
+      console.log(`User university set to: ${newValue.value}`);
 
       // Save university classes to local storage
       const universityClasses = UNIVERSITY_CLASSES[newValue.value];
@@ -96,12 +98,23 @@ const StudentProfileMyinfoMainContent: React.FC = () => {
 
     if (savedState) {
       setSelectedState(states.find(state => state.value === savedState) ?? null);
+      console.log(`Loaded saved state from localStorage: ${savedState}`);
     }
 
     if (savedUniversity) {
       setSelectedUniversity(universities.find(university => university.value === savedUniversity) ?? null);
+      console.log(`Loaded saved university from localStorage: ${savedUniversity}`);
     }
   }, []);
+
+  useEffect(() => {
+    if (selectedState && selectedUniversity) {
+      const universityState = UNIVERSITY_CLASSES[selectedUniversity.value]?.[0]?.state;
+      const status = universityState === selectedState.value ? 'in-state' : 'out-of-state';
+      setUser((prevUser) => prevUser ? { ...prevUser, residencyStatus: status } : null);
+      console.log(`Updated residencyStatus to ${status} based on universityState: ${universityState} and selectedState: ${selectedState.value}`);
+    }
+  }, [selectedState, selectedUniversity]);
 
   return (
     <Box className={containerStyle}>

@@ -4,9 +4,11 @@ import { IconTrash } from '@tabler/icons-react';
 import { useUser } from './UserContext'; // Ensure this path is correct
 import { UNIVERSITY_CLASSES } from 'C:/Users/benja/CourseSwap3/src/constants/universityClasses'; // Ensure this path is correct
 
+
 interface Course {
   universityName: string;
   associatedCollege: string;
+  state: string;
   genEdRequirement: string;
   universityCredits: number;
   collegeCredits: number;
@@ -21,10 +23,8 @@ interface Course {
   collegePriceOutState: number;
   universityCostInState: number;
   universityCostOutOfState: number;
-  universityCostInternational: number;
   universityFullCostInState: number;
-  universityFullCostOutState: number;
-  universityFullCostInternational: number;
+  universityFullCostOutOfState: number;
 }
 
 interface Row {
@@ -32,13 +32,15 @@ interface Row {
   universityId: string;
   universityCredits: number;
   online: boolean;
+  cost: number;
+  fullCost: number;
 }
 
 const CourseTable: React.FC = () => {
   const [rows, setRows] = useState<Row[]>([]);
   const [totalCredits, setTotalCredits] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useUser();
+  const { user, setFullCost } = useUser();
   const [classes, setClasses] = useState<Course[]>([]);
   const creditLimit = 1; // Limit to only one credit
 
@@ -56,18 +58,21 @@ const CourseTable: React.FC = () => {
     const total = rows.reduce((sum, row) => sum + row.universityCredits, 0);
     setTotalCredits(total);
     if (total > creditLimit) {
-      setError(`Only one credit from your home institution is allowed.`);
+      setError('Only one credit from your home institution is allowed.');
     } else {
       setError(null);
     }
-  }, [rows]);
+
+    const totalFullCost = rows.reduce((sum, row) => sum + row.fullCost, 0);
+    setFullCost(totalFullCost);
+  }, [rows, setFullCost]);
 
   const handleAddRow = () => {
     if (totalCredits >= creditLimit) {
-      setError(`Only one credit from your home institution is allowed.`);
+      setError('Only one credit from your home institution is allowed.');
       return;
     }
-    setRows([...rows, { id: Date.now(), universityId: '', universityCredits: 0, online: false }]);
+    setRows([...rows, { id: Date.now(), universityId: '', universityCredits: 0, online: false, cost: 0, fullCost: 0 }]);
   };
 
   const handleRemoveRow = (id: number) => {
@@ -80,6 +85,9 @@ const CourseTable: React.FC = () => {
   const handleCourseChange = (id: number, universityId: string) => {
     const selectedCourse = classes.find((course) => course.universityId === universityId);
     if (selectedCourse) {
+      const cost = user?.state === selectedCourse.state ? selectedCourse.universityCostInState : selectedCourse.universityCostOutOfState;
+      const fullCost = user?.state === selectedCourse.state ? selectedCourse.universityFullCostInState : selectedCourse.universityFullCostOutOfState;
+
       const newRowState = rows.map((row) => {
         if (row.id === id) {
           return {
@@ -87,6 +95,8 @@ const CourseTable: React.FC = () => {
             universityId: selectedCourse.universityId,
             universityCredits: selectedCourse.universityCredits,
             online: selectedCourse.online,
+            cost,
+            fullCost,
           };
         }
         return row;
@@ -106,7 +116,7 @@ const CourseTable: React.FC = () => {
         paddingBottom: '1rem',
         backgroundColor: totalCredits > creditLimit ? 'lightgray' : 'transparent', // Set background to light gray if limit exceeded
         transition: 'transform 0.2s ease-in-out',
-        height: '200px', // Adjusted height to fit exactly one row
+        height: '240px', // Adjusted height to fit exactly one row
       }}
       className="hover-effect"
     >
@@ -131,6 +141,12 @@ const CourseTable: React.FC = () => {
             </th>
             <th style={{ textAlign: 'center', padding: '24px', borderRight: '1px solid transparent', fontWeight: 'bold' }}>
               Online
+            </th>
+            <th style={{ textAlign: 'center', padding: '24px', borderRight: '1px solid transparent', fontWeight: 'bold' }}>
+              Cost
+            </th>
+            <th style={{ textAlign: 'center', padding: '24px', borderRight: '1px solid transparent', fontWeight: 'bold' }}>
+              Full Cost
             </th>
             <th style={{ textAlign: 'center', padding: '24px', fontWeight: 'bold' }}>
               Delete
@@ -166,6 +182,12 @@ const CourseTable: React.FC = () => {
               </td>
               <td style={{ textAlign: 'center', padding: '24px', borderRight: '1px solid transparent' }}>
                 {row.online ? 'Yes' : 'No'}
+              </td>
+              <td style={{ textAlign: 'center', padding: '24px', borderRight: '1px solid transparent' }}>
+                ${row.cost}
+              </td>
+              <td style={{ textAlign: 'center', padding: '24px', borderRight: '1px solid transparent' }}>
+                ${row.fullCost}
               </td>
               <td style={{ textAlign: 'center', padding: '24px' }}>
                 <Button variant="subtle" color="red" size="xs" onClick={() => handleRemoveRow(row.id)}>

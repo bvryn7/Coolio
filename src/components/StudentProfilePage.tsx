@@ -7,6 +7,7 @@ import BackButton from './BackButton';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from './CalculatorPage/UserContext';
 import { getUniversities, getStates, saveProfile } from '../services/apiServices';
+import { UNIVERSITY_CLASSES } from 'C:/Users/benja/CourseSwap3/src/constants/universityClasses';
 
 const StudentProfilePage: React.FC = () => {
   const isMediumScreen = useMediaQuery({ query: '(min-width: 768px)' });
@@ -17,6 +18,7 @@ const StudentProfilePage: React.FC = () => {
   const [university, setUniversity] = useState(user?.university || '');
   const [state, setState] = useState(user?.state || '');
   const [grade, setGrade] = useState(user?.grade || '');
+  const [residencyStatus, setResidencyStatus] = useState<'in-state' | 'out-of-state' | ''>(user?.residencyStatus || '');
   const [universities, setUniversities] = useState<any[]>([]);
   const [states, setStates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,6 +45,24 @@ const StudentProfilePage: React.FC = () => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    if (university && state) {
+      const universityState = UNIVERSITY_CLASSES[university]?.[0]?.state;
+      if (universityState) {
+        const status = universityState === state ? 'in-state' : 'out-of-state';
+        setResidencyStatus(status);
+        console.log(`Updated residencyStatus to ${status} based on universityState: ${universityState} and userState: ${state}`);
+      }
+    }
+  }, [university, state]);
+
+  useEffect(() => {
+    if (residencyStatus) {
+      localStorage.setItem('residencyStatus', residencyStatus);
+      console.log(`Residency status updated in local storage: ${residencyStatus}`);
+    }
+  }, [residencyStatus]);
+
   const handleSidebarToggle = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
@@ -58,7 +78,10 @@ const StudentProfilePage: React.FC = () => {
       university,
       state,
       grade,
+      residencyStatus,
     };
+
+    console.log('Submitting form with updated user data:', updatedUser);
 
     try {
       const savedUser = await saveProfile(updatedUser);
@@ -139,6 +162,18 @@ const StudentProfilePage: React.FC = () => {
                     <option value="Junior">Junior</option>
                     <option value="Senior">Senior</option>
                   </select>
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="residencyStatus">
+                    Residency Status
+                  </label>
+                  <input
+                    type="text"
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    id="residencyStatus"
+                    value={residencyStatus}
+                    readOnly
+                  />
                 </div>
                 <button
                   className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"

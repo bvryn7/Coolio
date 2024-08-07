@@ -1,14 +1,16 @@
-
 import React from 'react';
+import { useUser } from './UserContext'; // Ensure this path is correct
 import CardComponent from './CardComponent';
 
 const TransferMaxCombinedSchedule: React.FC = () => {
+  const { fullCost } = useUser();
+
   return (
     <div style={{ width: '100%' }}>
       <div className="bg-blue-100 p-4 flex justify-between items-center">
         <div>
           <p className="font-bold">Old Total Price</p>
-          <p>$0.00</p>
+          <p>${fullCost.toFixed(2)}</p> {/* Updated to use fullCost */}
         </div>
         <div className="bg-yellow-100 p-4 text-center">
           <p className="font-bold">B A's Semester Savings</p>
@@ -17,7 +19,7 @@ const TransferMaxCombinedSchedule: React.FC = () => {
         </div>
         <div>
           <p className="font-bold">New Total Price</p>
-          <p>$0.00</p>
+          <p>$0.00</p> {/* Kept as $0.00 */}
         </div>
       </div>
       <CardComponent>
