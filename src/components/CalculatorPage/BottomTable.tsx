@@ -107,6 +107,13 @@ const BottomTable: React.FC = () => {
     }
   };
 
+  const getPrice = (course: Course) => {
+    if (!user?.commCollegeResidency) return 0;
+    if (user.commCollegeResidency === 'in-district') return course.collegePriceInDistrict;
+    if (user.commCollegeResidency === 'in-state') return course.collegePriceInState;
+    return course.collegePriceOutState;
+  };
+
   return (
     <Box
       style={{
@@ -147,56 +154,66 @@ const BottomTable: React.FC = () => {
             <th style={{ textAlign: 'center', padding: '24px', borderRight: '1px solid transparent', fontWeight: 'bold' }}>
               Online
             </th>
+            <th style={{ textAlign: 'center', padding: '24px', borderRight: '1px solid transparent', fontWeight: 'bold' }}>
+              Cost
+            </th>
             <th style={{ textAlign: 'center', padding: '24px', fontWeight: 'bold' }}>
               Delete
             </th>
           </tr>
         </thead>
         <tbody>
-          {rows.map((row) => (
-            <tr key={row.id} style={{ borderBottom: '1px solid transparent' }}>
-              <td style={{ textAlign: 'left', padding: '24px', borderRight: '1px solid transparent' }}>
-                <select
-                  style={{ width: '100%', padding: '8px', border: 'none', background: 'transparent', outline: 'none' }}
-                  value={row.collegeId}
-                  onChange={(e) => handleCourseChange(row.id, e.target.value)}
-                >
-                  <option value="" disabled>
-                    Select Course
-                  </option>
-                  {classes.map((course) => (
-                    <option key={course.collegeId} value={course.collegeId}>
-                      {course.collegeCourse} ({course.collegeId})
+          {rows.map((row) => {
+            const selectedCourse = classes.find((course) => course.collegeId === row.collegeId);
+            const cost = selectedCourse ? getPrice(selectedCourse) * selectedCourse.collegeCredits : 0;
+            return (
+              <tr key={row.id} style={{ borderBottom: '1px solid transparent' }}>
+                <td style={{ textAlign: 'left', padding: '24px', borderRight: '1px solid transparent' }}>
+                  <select
+                    style={{ width: '100%', padding: '8px', border: 'none', background: 'transparent', outline: 'none' }}
+                    value={row.collegeId}
+                    onChange={(e) => handleCourseChange(row.id, e.target.value)}
+                  >
+                    <option value="" disabled>
+                      Select Course
                     </option>
-                  ))}
-                </select>
-              </td>
-              <td style={{ textAlign: 'center', padding: '24px', borderRight: '1px solid transparent' }}>
-                <input
-                  type="text"
-                  value={row.genEdRequirement}
-                  readOnly
-                  style={{ width: '100%', padding: '8px', border: 'none', background: 'transparent', outline: 'none' }}
-                />
-              </td>
-              <td style={{ textAlign: 'center', padding: '24px', borderRight: '1px solid transparent' }}>
-                <input
-                  type="text"
-                  value={row.collegeCredits}
-                  readOnly
-                  style={{ width: '100%', padding: '8px', border: 'none', background: 'transparent', outline: 'none', textAlign: 'center' }}
-                />
-              </td>
-              <td style={{ textAlign: 'center', padding: '24px', borderRight: '1px solid transparent' }}>
-                {row.online ? 'Yes' : 'No'}
-              </td>
-              <td style={{ textAlign: 'center', padding: '24px' }}>
-                <Button variant="subtle" color="red" size="xs" onClick={() => handleRemoveRow(row.id)}>
-                  <IconTrash size={16} />
-                </Button>
-              </td>
-            </tr>
-          ))}
+                    {classes.map((course) => (
+                      <option key={course.collegeId} value={course.collegeId}>
+                        {course.collegeCourse} ({course.collegeId})
+                      </option>
+                    ))}
+                  </select>
+                </td>
+                <td style={{ textAlign: 'center', padding: '24px', borderRight: '1px solid transparent' }}>
+                  <input
+                    type="text"
+                    value={row.genEdRequirement}
+                    readOnly
+                    style={{ width: '100%', padding: '8px', border: 'none', background: 'transparent', outline: 'none' }}
+                  />
+                </td>
+                <td style={{ textAlign: 'center', padding: '24px', borderRight: '1px solid transparent' }}>
+                  <input
+                    type="text"
+                    value={row.collegeCredits}
+                    readOnly
+                    style={{ width: '100%', padding: '8px', border: 'none', background: 'transparent', outline: 'none', textAlign: 'center' }}
+                  />
+                </td>
+                <td style={{ textAlign: 'center', padding: '24px', borderRight: '1px solid transparent' }}>
+                  {row.online ? 'Yes' : 'No'}
+                </td>
+                <td style={{ textAlign: 'center', padding: '24px', borderRight: '1px solid transparent' }}>
+                  ${cost.toFixed(2)}
+                </td>
+                <td style={{ textAlign: 'center', padding: '24px' }}>
+                  <Button variant="subtle" color="red" size="xs" onClick={() => handleRemoveRow(row.id)}>
+                    <IconTrash size={16} />
+                  </Button>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </Table>
     </Box>

@@ -65,8 +65,8 @@ export const UNIVERSITY_CLASSES: UniversityClasses = {
       collegePriceOutState: 450,
       universityCostInState: 1100,
       universityCostOutOfState: 2100,
-      universityFullCostInState: 1300,
-      universityFullCostOutOfState: 2300,
+      universityFullCostInState: 7000,
+      universityFullCostOutOfState: 7500,
     },
     {
       universityName: 'Central Michigan University',
@@ -129,8 +129,8 @@ export const UNIVERSITY_CLASSES: UniversityClasses = {
       collegePriceOutState: 200,
       universityCostInState: 500,
       universityCostOutOfState: 1000,
-      universityFullCostInState: 600,
-      universityFullCostOutOfState: 1100,
+      universityFullCostInState: 7000,
+      universityFullCostOutOfState: 8000,
     },
     {
       universityName: 'Central Michigan University',

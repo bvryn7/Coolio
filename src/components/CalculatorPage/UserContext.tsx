@@ -1,3 +1,5 @@
+// UserContext.tsx
+
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 // Define the User type and export it
@@ -9,7 +11,8 @@ export type User = {
   state?: string;
   grade?: string;
   homestate?: string;
-  residencyStatus?: 'in-state' | 'out-of-state'; // Add this line
+  residencyStatus?: 'in-state' | 'out-of-state';
+  commCollegeResidency?: 'in-district' | 'in-state' | 'out-of-state';
 };
 
 // Define the context types

@@ -1,3 +1,5 @@
+// StudentProfileMyinfoMainContent.tsx
+
 import React, { useState, useRef, useEffect, RefObject } from 'react';
 import { Box, Button } from '@mantine/core';
 import Select, { SingleValue } from 'react-select';
@@ -31,14 +33,18 @@ const StudentProfileMyinfoMainContent: React.FC = () => {
   const [showStateQuestion, setShowStateQuestion] = useState(false);
   const [showSecondQuestion, setShowSecondQuestion] = useState(false);
   const [showThirdQuestion, setShowThirdQuestion] = useState(false);
+  const [showFourthQuestion, setShowFourthQuestion] = useState(false);
   const [showEligibilityMessage, setShowEligibilityMessage] = useState(false);
   const [selectedUniversity, setSelectedUniversity] = useState<SelectOption | null>(null);
+  const [selectedResidency, setSelectedResidency] = useState<SelectOption | null>(null);
   const [confettiVisible, setConfettiVisible] = useState(false);
   const [scrollTo, setScrollTo] = useState<RefObject<HTMLDivElement> | null>(null);
+  const [associatedCollege, setAssociatedCollege] = useState<string>('Loading...');
 
   const stateQuestionRef = useRef<HTMLDivElement>(null);
   const secondQuestionRef = useRef<HTMLDivElement>(null);
   const thirdQuestionRef = useRef<HTMLDivElement>(null);
+  const fourthQuestionRef = useRef<HTMLDivElement>(null);
   const eligibilityMessageRef = useRef<HTMLDivElement>(null);
 
   const handleButtonClick = (button: string) => {
@@ -70,9 +76,8 @@ const StudentProfileMyinfoMainContent: React.FC = () => {
   const handleUniversityChange = (newValue: SingleValue<SelectOption>) => {
     setSelectedUniversity(newValue);
     if (newValue && user && user.id) {
-      setShowEligibilityMessage(true);
-      setConfettiVisible(true);
-      setScrollTo(eligibilityMessageRef);
+      setShowFourthQuestion(true);
+      setScrollTo(fourthQuestionRef);
 
       // Save selected university to local storage
       saveToLocalStorage('selectedUniversity', newValue.value);
@@ -83,12 +88,20 @@ const StudentProfileMyinfoMainContent: React.FC = () => {
       const universityClasses = UNIVERSITY_CLASSES[newValue.value];
       saveToLocalStorage('universityClasses', { [newValue.value]: universityClasses });
 
-      // Navigate to the appropriate page based on selected university
-      if (newValue.value === 'Central Michigan University') {
-        navigate('/central-michigan');
-      } else if (newValue.value === 'Grand Valley State University') {
-        navigate('/grand-valley-state');
-      }
+      // Set associated college
+      const associatedCollegeName = universityClasses?.[0]?.associatedCollege || 'Loading...';
+      setAssociatedCollege(associatedCollegeName);
+    }
+  };
+
+  const handleResidencyChange = (newValue: SingleValue<SelectOption>) => {
+    setSelectedResidency(newValue);
+    if (newValue && user && user.id) {
+      setUser({ ...user, commCollegeResidency: newValue.value as 'in-district' | 'in-state' | 'out-of-state' });
+      console.log(`User community college residency set to: ${newValue.value}`);
+      setShowEligibilityMessage(true);
+      setConfettiVisible(true);
+      setScrollTo(eligibilityMessageRef);
     }
   };
 
@@ -115,6 +128,12 @@ const StudentProfileMyinfoMainContent: React.FC = () => {
       console.log(`Updated residencyStatus to ${status} based on universityState: ${universityState} and selectedState: ${selectedState.value}`);
     }
   }, [selectedState, selectedUniversity]);
+
+  const residencyOptions = [
+    { value: 'in-district', label: 'In-District' },
+    { value: 'in-state', label: 'In-State' },
+    { value: 'out-of-state', label: 'Out-of-State' },
+  ];
 
   return (
     <Box className={containerStyle}>
@@ -245,6 +264,23 @@ const StudentProfileMyinfoMainContent: React.FC = () => {
               placeholder="Enter your university"
               styles={selectStyles}
               value={selectedUniversity}
+            />
+          </div>
+        </div>
+      )}
+      {showFourthQuestion && (
+        <div ref={fourthQuestionRef} className="mt-8">
+          <h2 className={questionHeadingStyle}>
+            {`Are you in-district, in-state, or out-of-state for ${associatedCollege}?`}
+          </h2>
+          <div className="w-full md:w-1/2 mx-auto">
+            <Select
+              className="w-full"
+              options={residencyOptions}
+              onChange={handleResidencyChange}
+              placeholder="Select your residency status"
+              styles={selectStyles}
+              value={selectedResidency}
             />
           </div>
         </div>
